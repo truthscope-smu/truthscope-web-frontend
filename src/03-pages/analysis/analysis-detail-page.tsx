@@ -111,6 +111,12 @@ export function AnalysisDetailPage() {
                   데이터가 아닌 6개월의 좁은 계절적 창에 기반합니다. 교차 참조
                   결과 1.8배가 통계적으로 근거있는 수치입니다.
                 </p>
+                <p
+                  className="font-pretendard mt-4 rounded bg-[var(--color-bg-surface)] px-4 py-2 text-xs font-medium text-[var(--color-text-accent)]"
+                  role="note"
+                >
+                  AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.
+                </p>
               </div>
             </article>
             {/* Claim Card Tier 3: Unverifiable */}
