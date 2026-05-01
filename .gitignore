@@ -33,6 +33,9 @@ Thumbs.db
 npm-debug.log*
 *.tsbuildinfo
 
+# Local ESLint JSON report (절대 경로 등이 포함될 수 있음)
+lint.json
+
 # Vercel
 .vercel
 
@@ -52,3 +55,7 @@ test-results/
 
 # AI generated
 AGENTS.md
+
+# Accidental empty files from mistaken shell redirects at repo root
+/next
+/checkmate-web-frontend@*

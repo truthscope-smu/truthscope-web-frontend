@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -12,11 +13,15 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,md}\"",
     "typecheck": "tsc --noEmit",
     "stylelint": "stylelint \"src/**/*.css\"",
-    "stylelint:fix": "stylelint \"src/**/*.css\" --fix"
+    "stylelint:fix": "stylelint \"src/**/*.css\" --fix",
+    "check:ci": "npm run format:check && npm run typecheck && npm run lint && npm run stylelint && npm run build",
+    "fix:all": "npm run format && npm run lint:fix && npm run stylelint:fix",
+    "prepare": "husky"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
+    "motion": "^12.38.0",
     "next": "16.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -30,11 +35,24 @@
     "eslint-config-next": "16.2.2",
     "eslint-plugin-fsd-lint": "^1.0.11",
     "eslint-plugin-import-x": "^4.16.2",
+    "husky": "^9.1.7",
+    "lint-staged": "15.5.2",
     "prettier": "^3.8.1",
     "stylelint": "^17.6.0",
     "stylelint-config-standard": "^40.0.0",
     "stylelint-declaration-strict-value": "^1.11.1",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,md}": [
+      "prettier --write"
+    ],
+    "src/**/*.{ts,tsx}": [
+      "eslint --fix"
+    ],
+    "src/**/*.css": [
+      "stylelint --fix"
+    ]
   }
 }

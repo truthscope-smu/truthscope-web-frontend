@@ -1,4 +1,4 @@
-import { apiClient } from '@/07-shared/api';
+import { apiClient } from '@/07-shared/api/base';
 import type {
   AnalysisRequest,
   AnalysisResponse,

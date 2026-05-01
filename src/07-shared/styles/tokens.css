@@ -16,6 +16,8 @@
   --color-blue-50: #f0f7ff;
   --color-purple-600: #681abb;
   --color-gray-700: #444444;
+  --color-green-600: #16a34a;
+  --color-green-50: #f0fdf4;
 
   /* --------------------------------------------------
    * Semantic Tokens — 항상 이것을 사용
@@ -42,6 +44,8 @@
 
   /* 상태 */
   --color-info: var(--color-blue-500);
+  --color-success-strong: var(--color-green-600);
+  --color-success-subtle: var(--color-green-50);
 
   /* --------------------------------------------------
    * Typography Tokens

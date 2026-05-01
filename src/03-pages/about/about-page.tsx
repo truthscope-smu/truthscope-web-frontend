@@ -1,4 +1,11 @@
 import Image from 'next/image';
+import {
+  ArrowRightIcon,
+  BadgeCheckIcon,
+  DatabaseIcon,
+  ICON_SIZE,
+  NetworkIcon,
+} from '@/07-shared/ui/icons';
 
 export function AboutPage() {
   return (
@@ -9,7 +16,7 @@ export function AboutPage() {
           <div className="absolute left-0 top-0 h-full w-full bg-[radial-gradient(circle_at_50%_50%,var(--color-blue-900)_0%,transparent_50%)]"></div>
         </div>
         <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
-          <span className="bg-surface-container-highest text-primary font-pretendard mb-8 inline-block rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]">
+          <span className="bg-surface-container-highest text-primary font-pretendard mb-8 inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em]">
             디지털 큐레이터
           </span>
           <h1 className="text-primary font-pretendard mx-auto mb-8 max-w-4xl text-6xl font-black leading-[0.9] tracking-tighter md:text-8xl">
@@ -47,9 +54,10 @@ export function AboutPage() {
                   type="button"
                 >
                   윤리 헌장 전문 읽기
-                  <span className="material-symbols-outlined text-secondary">
-                    arrow_forward
-                  </span>
+                  <ArrowRightIcon
+                    aria-hidden="true"
+                    className={`text-secondary ${ICON_SIZE.md}`}
+                  />
                 </button>
               </div>
             </div>
@@ -91,7 +99,7 @@ export function AboutPage() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             <div className="bg-surface-container-low border-outline-variant/10 flex h-full flex-col rounded-xl border p-8">
               <div className="bg-primary-container mb-10 flex h-12 w-12 items-center justify-center rounded-full text-white">
-                <span className="material-symbols-outlined">data_object</span>
+                <DatabaseIcon aria-hidden="true" className={ICON_SIZE.md} />
               </div>
               <h3 className="text-primary font-pretendard mb-4 text-xl font-bold">
                 수집 & 파싱
@@ -103,7 +111,7 @@ export function AboutPage() {
             </div>
             <div className="bg-surface-container-highest border-outline-variant/10 flex h-full flex-col rounded-xl border p-8">
               <div className="bg-secondary-container text-primary mb-10 flex h-12 w-12 items-center justify-center rounded-full">
-                <span className="material-symbols-outlined">account_tree</span>
+                <NetworkIcon aria-hidden="true" className={ICON_SIZE.md} />
               </div>
               <h3 className="text-primary font-pretendard mb-4 text-xl font-bold">
                 교차 검증
@@ -115,7 +123,7 @@ export function AboutPage() {
             </div>
             <div className="bg-primary-container flex h-full flex-col rounded-xl p-8 text-white">
               <div className="mb-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white">
-                <span className="material-symbols-outlined">verified</span>
+                <BadgeCheckIcon aria-hidden="true" className={ICON_SIZE.md} />
               </div>
               <h3 className="font-pretendard mb-4 text-xl font-bold">
                 3단계 점수화

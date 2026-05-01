@@ -1,3 +1,15 @@
+import {
+  BadgeCheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  FilterIcon,
+  HelpCircleIcon,
+  ICON_SIZE,
+  SearchIcon,
+  SortIcon,
+  TriangleAlertIcon,
+} from '@/07-shared/ui/icons';
+
 export function HistoryPage() {
   return (
     <>
@@ -122,9 +134,10 @@ export function HistoryPage() {
             </h2>
             <div className="flex flex-wrap items-center gap-3">
               <div className="group relative">
-                <span className="material-symbols-outlined text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2">
-                  search
-                </span>
+                <SearchIcon
+                  aria-hidden="true"
+                  className={`text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2 ${ICON_SIZE.sm}`}
+                />
                 <input
                   className="bg-surface-container-highest focus:ring-secondary font-pretendard border-none py-2 pl-10 pr-4 text-body-sm w-full outline-none transition-all focus:ring-2 focus:ring-offset-4 rounded-lg md:w-64"
                   placeholder="주장 검색..."
@@ -136,18 +149,14 @@ export function HistoryPage() {
                 className="bg-surface-container-low text-on-surface-variant font-pretendard hover:bg-surface-container-high flex items-center gap-2 rounded-lg px-4 py-2 text-body-sm transition-colors"
                 type="button"
               >
-                <span className="material-symbols-outlined text-[20px]">
-                  filter_list
-                </span>
+                <FilterIcon aria-hidden="true" className={ICON_SIZE.md} />
                 필터
               </button>
               <button
                 className="bg-surface-container-low text-on-surface-variant font-pretendard hover:bg-surface-container-high flex items-center gap-2 rounded-lg px-4 py-2 text-body-sm transition-colors"
                 type="button"
               >
-                <span className="material-symbols-outlined text-[20px]">
-                  sort
-                </span>
+                <SortIcon aria-hidden="true" className={ICON_SIZE.md} />
                 날짜순 정렬
               </button>
             </div>
@@ -156,12 +165,7 @@ export function HistoryPage() {
           <div className="space-y-4">
             <div className="bg-surface-container-lowest hover:translate-x-2 flex flex-col items-center gap-6 rounded-full p-6 transition-transform duration-300 md:flex-row">
               <div className="bg-secondary-container/20 text-secondary flex h-12 w-12 items-center justify-center rounded-xl">
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  verified
-                </span>
+                <BadgeCheckIcon aria-hidden="true" className={ICON_SIZE.md} />
               </div>
               <div className="flex-grow">
                 <div className="mb-1 flex items-center gap-3">
@@ -187,18 +191,21 @@ export function HistoryPage() {
                   </div>
                 </div>
                 <button
-                  className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+                  className="text-on-surface-variant hover:text-primary transition-colors"
                   type="button"
                   aria-label="상세 보기"
                 >
-                  arrow_forward_ios
+                  <ChevronRightIcon
+                    aria-hidden="true"
+                    className={ICON_SIZE.sm}
+                  />
                 </button>
               </div>
             </div>
 
             <div className="bg-surface-container-low hover:translate-x-2 flex flex-col items-center gap-6 rounded-full p-6 transition-transform duration-300 md:flex-row">
               <div className="bg-surface-container-highest text-on-surface-variant flex h-12 w-12 items-center justify-center rounded-xl">
-                <span className="material-symbols-outlined">rule</span>
+                <HelpCircleIcon aria-hidden="true" className={ICON_SIZE.md} />
               </div>
               <div className="flex-grow">
                 <div className="mb-1 flex items-center gap-3">
@@ -224,23 +231,24 @@ export function HistoryPage() {
                   </div>
                 </div>
                 <button
-                  className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+                  className="text-on-surface-variant hover:text-primary transition-colors"
                   type="button"
                   aria-label="상세 보기"
                 >
-                  arrow_forward_ios
+                  <ChevronRightIcon
+                    aria-hidden="true"
+                    className={ICON_SIZE.sm}
+                  />
                 </button>
               </div>
             </div>
 
             <div className="bg-error-container/30 hover:translate-x-2 flex flex-col items-center gap-6 rounded-full p-6 transition-transform duration-300 md:flex-row">
               <div className="bg-error/10 text-error flex h-12 w-12 items-center justify-center rounded-xl">
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  report
-                </span>
+                <TriangleAlertIcon
+                  aria-hidden="true"
+                  className={ICON_SIZE.md}
+                />
               </div>
               <div className="flex-grow">
                 <div className="mb-1 flex items-center gap-3">
@@ -266,11 +274,14 @@ export function HistoryPage() {
                   </div>
                 </div>
                 <button
-                  className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+                  className="text-on-surface-variant hover:text-primary transition-colors"
                   type="button"
                   aria-label="상세 보기"
                 >
-                  arrow_forward_ios
+                  <ChevronRightIcon
+                    aria-hidden="true"
+                    className={ICON_SIZE.sm}
+                  />
                 </button>
               </div>
             </div>
@@ -283,7 +294,7 @@ export function HistoryPage() {
               type="button"
               aria-label="이전 페이지"
             >
-              <span className="material-symbols-outlined">chevron_left</span>
+              <ChevronLeftIcon aria-hidden="true" className={ICON_SIZE.sm} />
             </button>
             <div className="flex items-center gap-2">
               <button
@@ -317,7 +328,7 @@ export function HistoryPage() {
               type="button"
               aria-label="다음 페이지"
             >
-              <span className="material-symbols-outlined">chevron_right</span>
+              <ChevronRightIcon aria-hidden="true" className={ICON_SIZE.sm} />
             </button>
           </div>
         </section>

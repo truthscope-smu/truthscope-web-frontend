@@ -1,9 +1,16 @@
 import Image from 'next/image';
+import {
+  BotIcon,
+  HelpCircleIcon,
+  ICON_SIZE,
+  ShieldIcon,
+  SourceIcon,
+} from '@/07-shared/ui/icons';
 
 export function AnalysisDetailPage() {
   return (
     <>
-      <section className="bg-surface-container-low sticky top-[72px] z-40 py-4 shadow-sm">
+      <section className="bg-surface-container-low sticky top-[var(--nav-height)] z-40 py-4 shadow-sm">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 px-8 md:flex-row md:items-center">
           <div className="flex-1">
             <span className="text-secondary font-pretendard mb-1 block text-xs font-bold tracking-widest">
@@ -25,24 +32,18 @@ export function AnalysisDetailPage() {
                 신뢰도 점수
               </div>
               <div className="mt-1 flex gap-1">
-                <span
-                  className="material-symbols-outlined text-secondary text-sm"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  shield
-                </span>
-                <span
-                  className="material-symbols-outlined text-secondary text-sm"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  shield
-                </span>
-                <span
-                  className="material-symbols-outlined text-on-surface-variant text-sm"
-                  style={{ fontVariationSettings: "'FILL' 0" }}
-                >
-                  shield
-                </span>
+                <ShieldIcon
+                  aria-hidden="true"
+                  className={`text-secondary ${ICON_SIZE.sm}`}
+                />
+                <ShieldIcon
+                  aria-hidden="true"
+                  className={`text-secondary ${ICON_SIZE.sm}`}
+                />
+                <ShieldIcon
+                  aria-hidden="true"
+                  className={`text-on-surface-variant ${ICON_SIZE.sm}`}
+                />
               </div>
             </div>
           </div>
@@ -64,12 +65,7 @@ export function AnalysisDetailPage() {
             {/* Claim Card Tier 1: Verified */}
             <article className="bg-surface-container-lowest border-secondary flex items-start gap-6 rounded-xl border-l-4 p-8">
               <div className="bg-secondary-container text-on-secondary-container flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full">
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  shield
-                </span>
+                <ShieldIcon aria-hidden="true" className={ICON_SIZE.md} />
               </div>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -94,12 +90,7 @@ export function AnalysisDetailPage() {
             {/* Claim Card Tier 2: AI Analyzed */}
             <article className="bg-surface-container-low border-secondary-container flex items-start gap-6 rounded-xl border-l-4 p-8">
               <div className="bg-secondary-fixed text-secondary flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full">
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  smart_toy
-                </span>
+                <BotIcon aria-hidden="true" className={ICON_SIZE.md} />
               </div>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -125,12 +116,7 @@ export function AnalysisDetailPage() {
             {/* Claim Card Tier 3: Unverifiable */}
             <article className="bg-surface-container-high border-outline-variant flex items-start gap-6 rounded-xl border-l-4 p-8">
               <div className="bg-surface-variant text-on-surface-variant flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full">
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  help_center
-                </span>
+                <HelpCircleIcon aria-hidden="true" className={ICON_SIZE.md} />
               </div>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -157,9 +143,10 @@ export function AnalysisDetailPage() {
           <aside className="space-y-10 lg:col-span-4">
             <div className="bg-surface-container rounded-xl p-8">
               <h2 className="font-pretendard text-primary mb-6 flex items-center gap-2 text-xl font-bold">
-                <span className="material-symbols-outlined text-secondary">
-                  source
-                </span>
+                <SourceIcon
+                  aria-hidden="true"
+                  className={`text-secondary ${ICON_SIZE.md}`}
+                />
                 출처 신뢰도
               </h2>
               <ul className="space-y-6">

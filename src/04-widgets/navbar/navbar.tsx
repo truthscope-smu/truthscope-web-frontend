@@ -2,11 +2,10 @@ import Link from 'next/link';
 
 function Navbar() {
   return (
-    <nav className="flex items-center justify-between px-6 py-4 border-b">
+    <nav className="mx-auto flex w-full max-w-7xl min-h-[var(--nav-height)] items-center justify-between border-b px-6 py-3 sm:px-8">
       <Link
         href="/"
-        className="font-pretendard text-[var(--color-text-heading)] font-bold"
-        style={{ fontFamily: 'Recipekorea' }}
+        className="font-display text-[var(--color-text-heading)] font-bold"
       >
         CheckMate
       </Link>
