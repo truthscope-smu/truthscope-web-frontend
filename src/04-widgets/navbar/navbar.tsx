@@ -39,7 +39,7 @@ function Navbar() {
         </button>
         <Link
           href="/#analysis-form"
-          className="font-pretendard rounded-lg bg-[var(--color-brand-primary)] px-6 py-2 font-bold text-white transition-colors hover:bg-[var(--color-brand-secondary)]"
+          className="font-pretendard rounded-lg bg-[var(--color-brand-primary)] px-6 py-2 font-bold text-[var(--color-text-on-brand)] transition-colors hover:bg-[var(--color-brand-secondary)]"
         >
           Get Started
         </Link>

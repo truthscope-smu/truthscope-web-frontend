@@ -41,6 +41,7 @@
   --color-text-secondary: var(--color-gray-700);
   --color-text-heading: var(--color-blue-900);
   --color-text-accent: var(--color-blue-700);
+  --color-text-on-brand: #ffffff;
 
   /* 상태 */
   --color-info: var(--color-blue-500);
