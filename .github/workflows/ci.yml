@@ -38,6 +38,20 @@ jobs:
       - name: Stylelint (디자인 토큰 검증)
         run: npm run stylelint
 
+      # ── 테스트 + Coverage ──
+
+      - name: Unit tests + coverage (thresholds enforced)
+        run: npm run test:coverage
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: warn
+
       # ── 빌드 ──
 
       - name: Build Project
