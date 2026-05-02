@@ -43,9 +43,9 @@ export function ArticleCard({ snapshot, actions, className }: Props) {
         상태: {article.status === 'EXTRACTED' ? '추출 완료' : '세션 부착됨'}
         {article.sessionId && ` (세션 ID: ${article.sessionId})`}
       </p>
-      {article.status === 'EXTRACTED' && actions && (
-        <div className="mt-[var(--spacing-16)]">{actions}</div>
-      )}
+      {/* rev.7 A4 reframe: BE auto-attach 정책으로 status는 항상 ATTACHED.
+          actions slot은 status 무관 노출 — AttachButton 내부에서 invariant/snapshot 기반 판단. */}
+      {actions && <div className="mt-[var(--spacing-16)]">{actions}</div>}
     </article>
   );
 }

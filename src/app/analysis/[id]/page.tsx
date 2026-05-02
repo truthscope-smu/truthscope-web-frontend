@@ -1,13 +1,13 @@
 'use client';
-// rev.1 CX1-01 fix + rev.2 CX2-04/CX2-11 fix:
-// BE controller 부재 → server-side findArticleById 불가. Phase 21에서 [id] page는 CSC.
-// Provider state는 navigation flow로 채워짐 — direct URL access (bookmark/refresh) 시 빈 화면.
-// Phase 22+ findArticleById endpoint 도입 후 RSC + force-dynamic 격상.
+// rev.1 CX1-01 fix + rev.2 CX2-04/CX2-11 fix + rev.7 A4 reframe:
+// BE controller 머지 (PR #28 + #29) — Phase 21 [id] page는 여전히 CSC (Provider state navigation flow).
+// Phase 22+ findArticleById endpoint를 RSC + force-dynamic 격상 옵션 검토 가능 (현재는 client-only).
 //
-// W3 BE 무관 영역 진행 — AttachToSessionButton (T3.3)는 BE phase 21-5 머지 후 W-1b 통과 시 actions slot에 주입.
+// W3-3 (rev.7): AttachToSessionButton actions slot 주입 — A4 reframe로 항상 409 ConflictException 시연.
 import Link from 'next/link';
 import { useArticle } from '@/app/providers/article.context';
 import { ArticleCard } from '@/04-widgets/article-card';
+import { AttachToSessionButton } from '@/05-features/attach-to-session';
 
 export default function AnalysisDetailPage() {
   const { snapshot } = useArticle();
@@ -32,10 +32,18 @@ export default function AnalysisDetailPage() {
     );
   }
 
+  // rev.7 A4: snapshot의 sessionId가 없으면 attach 시도 자체가 무의미 (선행 분석 필요).
+  const attachActions = snapshot.sessionId ? (
+    <AttachToSessionButton
+      articleId={snapshot.id}
+      sessionId={snapshot.sessionId}
+    />
+  ) : null;
+
   return (
     <main className="p-[var(--spacing-24)]">
       <h1>분석 결과</h1>
-      <ArticleCard snapshot={snapshot} />
+      <ArticleCard snapshot={snapshot} actions={attachActions} />
     </main>
   );
 }
