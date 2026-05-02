@@ -2,6 +2,9 @@
   "name": "checkmate-web-frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9 <23"
+  },
   "scripts": {
     "dev": "next dev --webpack",
     "dev:turbo": "next dev --turbopack",
@@ -14,7 +17,14 @@
     "typecheck": "tsc --noEmit",
     "stylelint": "stylelint \"src/**/*.css\"",
     "stylelint:fix": "stylelint \"src/**/*.css\" --fix",
-    "check:ci": "npm run format:check && npm run typecheck && npm run lint && npm run stylelint && npm run build",
+    "test": "vitest run --passWithNoTests",
+    "test:unit": "vitest run --project unit --passWithNoTests",
+    "test:browser": "vitest run --project browser --passWithNoTests",
+    "test:watch": "vitest",
+    "arch": "depcruise --config .dependency-cruiser.cjs src",
+    "check:names": "node scripts/check-file-names.mjs",
+    "check:cache": "node scripts/check-cache-config.mjs",
+    "check:ci": "npm run format:check && npm run typecheck && npm run lint && npm run stylelint && npm run arch && npm run check:names && npm run check:cache && npm run test:unit && npm run build",
     "fix:all": "npm run format && npm run lint:fix && npm run stylelint:fix",
     "prepare": "husky"
   },
@@ -28,21 +38,36 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/browser": "^4.1.5",
+    "@vitest/browser-playwright": "^4.1.5",
+    "clsx": "^2.1.1",
+    "dependency-cruiser": "^17.3.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
     "eslint-plugin-fsd-lint": "^1.0.11",
     "eslint-plugin-import-x": "^4.16.2",
     "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
     "lint-staged": "15.5.2",
+    "msw": "^2.14.2",
+    "playwright": "^1.59.1",
     "prettier": "^3.8.1",
     "stylelint": "^17.6.0",
     "stylelint-config-standard": "^40.0.0",
     "stylelint-declaration-strict-value": "^1.11.1",
+    "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.5",
+    "zod": "^4.4.2"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,md}": [
@@ -53,6 +78,11 @@
     ],
     "src/**/*.css": [
       "stylelint --fix"
+    ]
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
     ]
   }
 }
