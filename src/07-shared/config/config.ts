@@ -8,6 +8,7 @@ export const config = {
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
   },
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api',
+    /** Spring Boot Base URL (prefix 포함, 예: http://localhost:8080/api/v1) */
+    baseUrl: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api/v1',
   },
 } as const;

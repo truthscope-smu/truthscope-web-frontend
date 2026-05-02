@@ -33,6 +33,9 @@ Thumbs.db
 npm-debug.log*
 *.tsbuildinfo
 
+# Local ESLint JSON report (절대 경로 등이 포함될 수 있음)
+lint.json
+
 # Vercel
 .vercel
 
@@ -50,5 +53,8 @@ test-results/
 .vscode/
 *.swp
 
-# AI generated
-AGENTS.md
+# AGENTS.md는 팀 공유 — gitignore 제거 (Sprint 2 Sprint 멤버 onboarding 의무 자료)
+
+# Accidental empty files from mistaken shell redirects at repo root
+/next
+/truthscope-web-frontend@*

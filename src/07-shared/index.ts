@@ -3,4 +3,4 @@
  * 모든 레이어에서 import 가능한 기반 레이어
  */
 export { AppError } from './errors';
-export { apiFetch } from './api';
+export { apiClient } from './api';

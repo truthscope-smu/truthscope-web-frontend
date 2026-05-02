@@ -1,8 +1,8 @@
-# checkmate-web-frontend
+# truthscope-web-frontend
 
 ## 1. 프로젝트 개요 (Project Overview)
 
-**CheckMate Web**은 AI 기반 뉴스 신뢰도 분석 웹앱의 **프론트엔드**입니다.  
+**TruthScope Web**은 AI 기반 뉴스 신뢰도 분석 웹앱의 **프론트엔드**입니다.  
 사용자가 뉴스 URL을 입력하면 Spring Boot 백엔드가 본문 추출 → Claim 추출 → 3-Tier Cascade 검증을 수행하고, 프론트엔드가 결과를 시각화합니다.  
 8주 팀 프로젝트로, 실제 협업 경험과 배포 파이프라인 운영을 핵심 목표로 합니다.
 
@@ -15,7 +15,7 @@
 | **Framework** | `Next.js 15` (App Router), `TypeScript` |
 | **Architecture** | `Feature-Sliced Design` (커스텀 번호 체계) |
 | **Auth / DB** | `Supabase` (PostgreSQL + Auth) |
-| **Backend** | `Spring Boot 3.x` (별도 레포: checkmate-web-backend) |
+| **Backend** | `Spring Boot 3.x` (별도 레포: truthscope-web-backend) |
 | **External API** | `Google Gemini API`, `Google Fact Check API`, `DeepL API` |
 | **DevOps** | `Vercel` |
 
@@ -26,7 +26,7 @@
 ### 저장소 복제
 
 ```bash
-git clone https://github.com/checkmate-smu/checkmate-web-frontend.git
+git clone https://github.com/truthscope-smu/truthscope-web-frontend.git
 ```
 
 ### 의존성 설치
@@ -95,7 +95,7 @@ app → 03-pages → 04-widgets → 05-features → 06-entities → 07-shared
 ```
 
 ```
-checkmate-web-frontend/
+truthscope-web-frontend/
 ├── src/
 │   ├── app/              # Next.js App Router (라우트 + 레이아웃)
 │   ├── 03-pages/         # 페이지 단위 컴포넌트

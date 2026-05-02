@@ -1,5 +1,5 @@
 /** @type {import('stylelint').Config} */
-export default {
+const config = {
   extends: ["stylelint-config-standard"],
   ignoreFiles: ["**/tokens.css", "**/globals.css"],
   plugins: ["stylelint-declaration-strict-value"],
@@ -21,3 +21,5 @@ export default {
     "import-notation": null,
   },
 };
+
+export default config;

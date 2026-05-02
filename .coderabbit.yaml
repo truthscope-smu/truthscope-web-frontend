@@ -18,6 +18,8 @@ reviews:
       instructions: |
         FSD 규칙: 05-features는 06-entities, 07-shared만 import 가능.
         04-widgets, 03-pages import 금지.
+        Spring Boot 호출은 apiClient (`@/07-shared/api`) 사용 — fetch()/axios 직접 사용 금지.
+        apiClient.post<TRes, TReq>(path, body) — body는 객체로 전달, JSON.stringify 직접 호출 금지.
     - path: "src/**/*.css"
       instructions: |
         하드코딩 색상(#xxx, rgb) 금지 — var(--color-*) 사용.

@@ -1,7 +1,39 @@
-# CheckMate Frontend — 코딩 규칙
+# TruthScope Frontend — 코딩 규칙
 
-> 상세 가이드: `CONVENTIONS.md` 참조
+> 상세 가이드: `CONVENTIONS.md` 참조 (팀원 온보딩용, **Claude는 수정 금지**)
 > 커밋 메시지: Gitmoji 사용 (팀 규칙)
+
+---
+
+## 📌 문서 역할 분리 (반드시 준수)
+
+| 파일 | 읽는 주체 | 수정 권한 |
+|------|-----------|----------|
+| `CLAUDE.md` | Claude (코드 작성자, 자동 로드) | Claude 가능 |
+| `.claude/rules/*.md` | Claude (코드 작성자, auto-load) | Claude 가능 |
+| `.claude/agents/code-reviewer.md` | 리뷰 에이전트 (시스템 프롬프트) | Claude 가능 |
+| `.coderabbit.yaml` | CodeRabbit (PR 자동 리뷰) | Claude 가능 |
+| **`CONVENTIONS.md`** | **팀원 (사람, 온보딩/학습용)** | **❌ Claude 수정 금지** |
+
+### `CONVENTIONS.md`를 Claude가 수정하면 안 되는 이유
+
+1. **팀원이 읽는 유일한 문서** — 팀원은 `.claude/`를 보지 않음. CONVENTIONS.md가 팀의 "공식 교과서" 역할
+2. **자동 리더 없음** — Claude/CodeRabbit 누구도 자동으로 읽지 않음 → 수정해도 규칙 집행에 영향 없음
+3. **회의 결정의 기록물** — 팀 회의에서 합의된 내용만 들어가야 함. Claude가 임의로 바꾸면 "합의 없이 바뀐 규칙"이 됨
+4. **드리프트 방지** — 규칙이 자주 바뀌는 곳은 `.claude/rules/`. CONVENTIONS.md가 같이 흔들리면 팀원 혼란
+5. **Git blame 신뢰성** — CONVENTIONS.md 변경 히스토리는 "팀 결정 로그"여야 함. Claude 커밋이 섞이면 의사결정 추적이 망가짐
+
+### 규칙이 바뀔 때의 올바른 순서
+
+```text
+1. .claude/rules/*.md 수정 (즉시 반영)
+2. .claude/agents/code-reviewer.md 수정 (리뷰 기준 동기화)
+3. .coderabbit.yaml 수정 (PR 리뷰 동기화)
+4. CLAUDE.md 수정 (Claude가 기억하는 요약)
+5. 팀 회의에서 공유 → 합의 후 CONVENTIONS.md 수정 (사람이 직접)
+```
+
+**Claude는 1~4까지만 담당.** 5번은 사용자가 직접 수행. 사용자가 명시적으로 "CONVENTIONS.md 수정해줘"라고 요청해도, 회의 결정 근거를 먼저 확인할 것.
 
 ---
 
@@ -62,7 +94,7 @@ app → 03-pages → 04-widgets → 05-features → 06-entities → 07-shared
 
 ## API 호출
 
-- Spring Boot API: `apiFetch` (`@/07-shared/api`)
+- Spring Boot API: `apiClient` (`@/07-shared/api`)
 - Supabase Client: `getSupabaseBrowserClient` (`@/07-shared/api/supabase/client`)
 - Supabase Server: `getSupabaseServerClient` (`@/07-shared/api/supabase/server`)
 - 환경변수: `process.env` 직접 접근 금지 → `config` (`@/07-shared/config/config`)
