@@ -67,7 +67,7 @@ export function BentoSection() {
               분석 리포트 예시
             </h2>
             <p className="text-on-surface-variant font-pretendard mt-3 text-lg font-medium">
-              CheckMate가 제공하는 검증 리포트의 구성 예시입니다.
+              TruthScope가 제공하는 검증 리포트의 구성 예시입니다.
             </p>
           </div>
           <Link

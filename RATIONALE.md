@@ -1,6 +1,6 @@
-# RATIONALE — checkmate-web-frontend
+# RATIONALE — truthscope-web-frontend
 
-본 파일은 checkmate-web-frontend의 주요 의사결정 배경을 누적 박제. ADR과 별도 — ADR은 결정/Status, RATIONALE은 narrative 컨텍스트.
+본 파일은 truthscope-web-frontend의 주요 의사결정 배경을 누적 박제. ADR과 별도 — ADR은 결정/Status, RATIONALE은 narrative 컨텍스트.
 
 ---
 

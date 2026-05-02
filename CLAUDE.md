@@ -1,4 +1,4 @@
-# CheckMate Frontend — 코딩 규칙
+# TruthScope Frontend — 코딩 규칙
 
 > 상세 가이드: `CONVENTIONS.md` 참조 (팀원 온보딩용, **Claude는 수정 금지**)
 > 커밋 메시지: Gitmoji 사용 (팀 규칙)

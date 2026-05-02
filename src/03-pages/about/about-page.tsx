@@ -39,8 +39,8 @@ export function AboutPage() {
             <div className="text-on-surface-variant font-pretendard space-y-8 text-lg leading-loose">
               <p>
                 초고속 디지털 소비의 시대, 사실 보도와 의도된 허위 정보의 경계가
-                흐려졌습니다. CheckMate는 민주주의의 근간인 공유된 진실을 되찾기
-                위해 존재합니다.
+                흐려졌습니다. TruthScope는 민주주의의 근간인 공유된 진실을
+                되찾기 위해 존재합니다.
               </p>
               <p>
                 단순히 사실을 확인하는 것을 넘어, 디지털 생태계를
@@ -268,7 +268,7 @@ export function AboutPage() {
                 팀 소개
               </h2>
               <p className="text-on-surface-variant font-pretendard text-lg">
-                CheckMate는 탐사 저널리스트, AI 연구원, 시민권 옹호자들이 모여
+                TruthScope는 탐사 저널리스트, AI 연구원, 시민권 옹호자들이 모여
                 설립했습니다.
               </p>
             </div>
@@ -291,7 +291,7 @@ export function AboutPage() {
                 />
               </div>
               <h4 className="text-primary font-pretendard text-lg font-bold">
-                CheckMate 팀
+                TruthScope 팀
               </h4>
               <p className="text-secondary font-pretendard mb-2 text-sm font-medium">
                 개발팀

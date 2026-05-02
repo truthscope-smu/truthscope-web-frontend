@@ -1,4 +1,4 @@
-# CheckMate Frontend DDD/TDD Guide
+# TruthScope Frontend DDD/TDD Guide
 
 > 본 가이드는 Phase 21 (Article aggregate adoption) 산출물을 reference로 한 패턴 가이드. ADR-006 박제 정합.
 
@@ -131,7 +131,7 @@ Aggregate 적용 기준 (2개 이상 충족):
 - lifecycle 상태 전이가 method 캡슐화 필요
 - 외부 source 다수 (Spring BE + Supabase = 2 source rehydration 필요)
 
-## CheckMate FSD 번호 체계 (참조)
+## TruthScope FSD 번호 체계 (참조)
 
 - `app/` — Next.js App Router routing + providers
 - `03-pages/` — 페이지 컴포넌트 (RSC 또는 CSC)
@@ -146,7 +146,7 @@ import 방향: `app → 03-pages → 04-widgets → 05-features → 06-entities 
 
 archetype-ddd-pilot의 첫 production-like adoption signal로 작용. 옵시디언 history에 6항목 정량 박제 의무 (verify 통과 후).
 
-## Tooling 체크리스트 (CheckMate-specific)
+## Tooling 체크리스트 (TruthScope-specific)
 
 - `apiClient` import는 `@/07-shared/api/base` 직접 (barrel 우회 — server.ts client bundle 폴루션 회피)
 - intra-slice import는 절대경로 (`@06-entities/article/model/snapshot` 형태) — barrel 파일(`index.ts`)만 `./` 상대 export 허용

@@ -1,4 +1,4 @@
-# CheckMate Frontend — PR 리뷰 규칙
+# TruthScope Frontend — PR 리뷰 규칙
 
 > Claude AI 리뷰어 전용. 한국어로 리뷰한다.
 > 포맷/FSD 의존성/타입 에러/디자인 토큰은 CI(Prettier + ESLint + tsc + Stylelint)가 자동 차단하므로 여기서 다루지 않는다.
