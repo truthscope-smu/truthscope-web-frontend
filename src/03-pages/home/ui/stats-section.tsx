@@ -75,7 +75,7 @@ export function StatsSection() {
           Core Features
         </span>
         <h2 className="text-primary font-display text-3xl font-bold tracking-tight md:text-4xl">
-          CheckMate의 핵심 기능
+          TruthScope의 핵심 기능
         </h2>
       </motion.div>
 

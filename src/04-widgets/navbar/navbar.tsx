@@ -14,7 +14,7 @@ function Navbar() {
         href="/"
         className="font-display text-[var(--color-text-heading)] font-bold"
       >
-        CheckMate
+        TruthScope
       </Link>
 
       <ul className="hidden md:flex items-center gap-8">

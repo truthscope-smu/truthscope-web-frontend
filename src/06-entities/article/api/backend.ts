@@ -1,7 +1,7 @@
 // W3 fix (2026-05-02): apiClient는 `@/07-shared/api/base` 직접 import.
 // `@/07-shared/api` barrel은 supabase/server (next/headers 의존)를 re-export하므로
 // barrel 경유 시 client component bundle에 server-only code 폴루션 (next build 실패).
-// 기존 CheckMate 패턴 정합 — 05-features/analysis/api.ts:1 와 동일.
+// 기존 TruthScope 패턴 정합 — 05-features/analysis/api.ts:1 와 동일.
 import { apiClient } from '@/07-shared/api/base';
 import {
   fromAnalysisSession,

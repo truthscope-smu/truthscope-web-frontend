@@ -57,4 +57,4 @@ test-results/
 
 # Accidental empty files from mistaken shell redirects at repo root
 /next
-/checkmate-web-frontend@*
+/truthscope-web-frontend@*

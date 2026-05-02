@@ -15,7 +15,7 @@ Accepted (2026-05-02)
 
 ## Motivation (P7)
 
-CheckMate 현 코드 (`05-features/analysis/api.ts` 16줄)는 `apiClient.post('/analysis-sessions', { url })` 단일 함수 + DTO 직접 사용 — anemic model 패턴.
+TruthScope 현 코드 (`05-features/analysis/api.ts` 16줄)는 `apiClient.post('/analysis-sessions', { url })` 단일 함수 + DTO 직접 사용 — anemic model 패턴.
 
 **실제 problem 1건 명시**: 현 `analysis-form.tsx`는 URL 입력 검증을 하지 않아 `ftp://` 또는 일반 텍스트가 BE로 전달됨. BE가 400 응답을 반환할 때까지 user feedback 없음 (네트워크 라운드트립 1회 낭비 + UX 지연 ~200ms).
 
@@ -31,13 +31,13 @@ Article aggregate URL invariant (`Article.extract(url, ...)`이 invalid URL thro
 
 - 파일명: `06-entities/article/model/article.ts` (kebab-case)
 - 클래스 export: `export class Article` (named export only — `export default` 금지)
-- 사유: CheckMate FE CLAUDE.md `파일명 kebab-case` 룰 + Linux CI case-sensitivity 함정 회피
+- 사유: TruthScope FE CLAUDE.md `파일명 kebab-case` 룰 + Linux CI case-sensitivity 함정 회피
 - 강제 도구: `scripts/check-file-names.mjs` (Wave 1 T1.4) + `unicorn/filename-case` 후속 검토 (P3)
 - archetype-ddd-pilot의 `Order.ts` PascalCase 파일은 path-aware codemod로 변환 (`from './Article'` 같은 path token만, 클래스명 `Article`은 보존)
 
 ### Q3 api 어댑터 전략 (rev.4 reframe — 축소 단일 BE adapter, 의도적 archetype deviation)
 
-- archetype `Axios + base.ts` 단일 vs CheckMate 두 데이터 소스(Spring BE `/api/v1/...` + Supabase Auth/reaction) 통합 불가
+- archetype `Axios + base.ts` 단일 vs TruthScope 두 데이터 소스(Spring BE `/api/v1/...` + Supabase Auth/reaction) 통합 불가
 - **rev.4 reframe** (mini-DISCUSS addendum §12): Phase 21 BE 실측 결과 ArticleController 부재 → BE single endpoint (`POST /analysis-sessions`)만 wiring. Supabase adapter는 Phase 22+ deferred (Auth/RLS/Realtime scope).
 - **Phase 21 채택 (4 파일)**: `06-entities/article/api/{backend.ts, dto.ts, mappers.ts, index.ts}`
 - **Phase 22+ deferred (1 파일 + endpoints 추가)**: `supabase.ts` (`SupabaseClient` 인자 주입 + RSC 호환) + `findArticleById` + `requestAttachToSession` + `saveArticleReaction` + `findArticleByIdFromSupabase`
@@ -79,7 +79,7 @@ Article aggregate URL invariant (`Article.extract(url, ...)`이 invalid URL thro
 
 ## Why two adapters (not single Axios)?
 
-- CheckMate는 두 데이터 소스: Spring BE (REST `/api/v1/...`) + Supabase (Auth + reaction storage)
+- TruthScope는 두 데이터 소스: Spring BE (REST `/api/v1/...`) + Supabase (Auth + reaction storage)
 - 단일 Axios로 통합 시 Supabase JS SDK + RLS + cookie 처리 손실 (PR#9 자산도 같이 폐기)
 - archetype-ddd-pilot 정합은 의도적 deviation — Phase 22+ 단일 source archetype 적용 phase 등장 시 재검토
 
@@ -175,7 +175,7 @@ PLAN spec과 실측 차이 — 모두 PR description 박제:
 1. **`no-cross-feature-import` dep-cruiser 룰 제거** (W1 T1.2): dep-cruiser 17.3.10 백레퍼런스 false positive. ADR §책임 분리표 row 15 정합 — fsd-lint 단독.
 2. **`jsdom` 추가 install** (W2 T2.5): vitest 4 environment:'jsdom' 분리 패키지화. PLAN T0.3 12 packages 누락.
 3. **dep-cruiser R5 narrow** (W3 T3.4): consumer hook (`useArticle`) 차단 false positive. `*provider.tsx` filename pattern으로 narrow.
-4. **apiClient barrel 우회** (W3 hotfix): `@/07-shared/api` barrel이 server-only `getSupabaseServerClient` re-export하여 client bundle 폴루션 → next build 실패. 기존 CheckMate 패턴(`05-features/analysis/api.ts:1`) 정합.
+4. **apiClient barrel 우회** (W3 hotfix): `@/07-shared/api` barrel이 server-only `getSupabaseServerClient` re-export하여 client bundle 폴루션 → next build 실패. 기존 TruthScope 패턴(`05-features/analysis/api.ts:1`) 정합.
 
 ### W3 BE 의존 영역 (W-1b 게이트 통과 후 진행 의무)
 
@@ -191,5 +191,5 @@ PLAN spec과 실측 차이 — 모두 PR description 박제:
 
 ### 옵시디언 history (verify 통과 후 박제 의무)
 
-`Team-project/checkmate-web/history/2026-MM-DD-phase-21-frontend-ddd-tdd.md` —
+`Team-project/truthscope-web/history/2026-MM-DD-phase-21-frontend-ddd-tdd.md` —
 14a Revision adoption signal 6항목 정량 박제 (T5.2 §옵시디언 history 표 정합).

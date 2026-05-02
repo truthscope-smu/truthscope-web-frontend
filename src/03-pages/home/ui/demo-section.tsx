@@ -145,7 +145,7 @@ export function DemoSection() {
             분석 프로세스를 직접 확인하세요
           </h2>
           <p className="text-on-surface-variant font-pretendard mx-auto mt-4 max-w-xl text-lg">
-            아래 샘플 클레임을 클릭하면 CheckMate의 검증 과정을 미리 체험할 수
+            아래 샘플 클레임을 클릭하면 TruthScope의 검증 과정을 미리 체험할 수
             있습니다.
           </p>
         </motion.div>
@@ -204,7 +204,7 @@ export function DemoSection() {
                   <span className="h-3 w-3 rounded-full bg-green-400" />
                 </div>
                 <span className="text-on-surface-variant font-pretendard ml-2 text-xs">
-                  CheckMate Analysis Engine
+                  TruthScope Analysis Engine
                 </span>
                 {isAnalyzing && (
                   <span className="ml-auto font-pretendard text-xs text-blue-500 font-medium">

@@ -74,7 +74,7 @@ export function CtaSection() {
             animate={isInView ? { opacity: 1, y: 0 } : undefined}
             transition={{ duration: 0.5, delay: 0.3, ease: EASE_OUT_EXPO }}
           >
-            CheckMate와 함께라면 가짜 뉴스에 더 이상 속지 않습니다. 무료로
+            TruthScope와 함께라면 가짜 뉴스에 더 이상 속지 않습니다. 무료로
             시작하세요.
           </motion.p>
 

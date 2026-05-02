@@ -285,7 +285,7 @@ export function HeroSection() {
           >
             <span className="text-shimmer">뉴스 신뢰도,</span>
             <br />
-            <span className="text-primary">CheckMate로</span>
+            <span className="text-primary">TruthScope로</span>
             <br />
             <span className="text-primary">확인하세요</span>
           </motion.h1>

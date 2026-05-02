@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'CheckMate — AI 뉴스 신뢰도 분석',
+  title: 'TruthScope — AI 뉴스 신뢰도 분석',
   description: 'AI 기반 뉴스 팩트체크 및 신뢰도 분석 서비스',
 };
 
