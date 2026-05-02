@@ -1,4 +1,4 @@
-# CheckMate Web Frontend — 코딩 컨벤션 가이드
+# TruthScope Web Frontend — 코딩 컨벤션 가이드
 
 > 이 문서는 팀원이 코드를 작성할 때 참고하는 규칙입니다.
 
