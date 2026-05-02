@@ -35,32 +35,61 @@ export class Article {
   }
 
   /**
-   * rev.1 CX1-01 + rev.2 CX2-05 fix: BE controller 부재 대응.
-   * AnalysisResponse {sessionId, status (mapped from SessionStatus)} + 사용자 입력 url로 Article 합성.
-   * title/content는 placeholder marker — widget의 displayTitle logic이 user-friendly 텍스트로 대체.
+   * rev.7 P21-5-1: BE PR #29 6ad70ec 머지 후 articleId 노출.
+   * AnalysisResponse {sessionId, status, articleId} → Article 합성 (id는 articleId 사용).
    *
    * Q1 reframe: BE Article entity와 FE Article class 1:1 매핑 (entity-level).
-   * Controller exposure는 Phase 22+. transport는 AnalysisResponse 단일.
+   * BE auto-attach 정책으로 본 응답 시점에 BE article은 이미 ATTACHED 상태이지만,
+   * FE Article의 status는 mappers.ts에서 SessionStatus → ArticleStatus 매핑 결과 사용
+   * (EXTRACTING → EXTRACTED). 실제 attach 상태 확인은 findArticleById 호출로 별도 조회.
    *
-   * 입력 status는 이미 mappers.ts의 mapSessionStatusToArticleStatus()를 통과한 ArticleStatus.
-   * rev.2 CX2-01: silent cast 제거 — fromAnalysisSession은 ArticleStatus만 받음.
+   * title/content는 placeholder marker — widget의 displayTitle logic이 user-friendly 텍스트로 대체.
    */
   static fromAnalysisSession(input: {
     url: string;
     sessionId: string;
+    articleId: string;
     status: ArticleStatus;
   }): Article {
     if (!URL_PATTERN.test(input.url)) {
       throw new InvariantViolationError(`URL invariant 위반: ${input.url}`);
     }
     return new Article(
-      input.sessionId, // id = sessionId (placeholder, ArticleController 작성 후 변경)
+      input.articleId, // rev.7 P21-5-1: BE 실 articleId (sessionId placeholder 제거)
       input.url,
-      '(서버에서 추출 중)', // rev.2 CX2-05: marker prefix — widget displayTitle 매칭
-      '(서버에서 추출 중)', // rev.3 CX3-04: 'Phase 22+' user-facing 흔적 제거
+      '(서버에서 추출 중)',
+      '(서버에서 추출 중)',
       input.status,
       input.sessionId,
       new Date().toISOString()
+    );
+  }
+
+  /**
+   * rev.7 P4: BE PR #28 d9b6168 ArticleController 머지 후 활성화.
+   * GET /api/v1/articles/{id} + POST /api/v1/articles/{id}/attach 응답 → Article 합성.
+   * BE는 title/content가 추출 진행 중이면 null로 응답 — placeholder marker로 변환.
+   */
+  static fromBackendDto(dto: {
+    id: string;
+    url: string;
+    title: string | null;
+    content: string | null;
+    status: ArticleStatus;
+    sessionId: string | null;
+    createdAt: string;
+  }): Article {
+    if (!URL_PATTERN.test(dto.url)) {
+      throw new InvariantViolationError(`URL invariant 위반: ${dto.url}`);
+    }
+    return new Article(
+      dto.id,
+      dto.url,
+      dto.title ?? '(서버에서 추출 중)',
+      dto.content ?? '(서버에서 추출 중)',
+      dto.status,
+      dto.sessionId,
+      dto.createdAt
     );
   }
 

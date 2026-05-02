@@ -4,6 +4,7 @@ import {
 } from '@06-entities/article/model/article';
 import { InvariantViolationError } from '@06-entities/article/model/errors';
 import type {
+  ArticleBackendDto,
   ArticleExtractionResponse,
   AnalysisSessionStatus,
 } from '@06-entities/article/api/dto';
@@ -45,8 +46,8 @@ function mapSessionStatusToArticleStatus(
 }
 
 /**
- * rev.2 CX2-01 fix: BE 실측 contract (AnalysisResponse) → Article 합성 with status guard.
- * sessionStatus 매핑 실패 시 InvariantViolationError throw — form catch에서 user feedback.
+ * rev.7 P21-5-1: BE PR #29 6ad70ec articleId 노출 후 — articleId pass-through.
+ * sessionStatus 매핑 실패 시 InvariantViolationError throw.
  */
 export function fromAnalysisSession(
   url: string,
@@ -56,13 +57,21 @@ export function fromAnalysisSession(
   return Article.fromAnalysisSession({
     url,
     sessionId: response.sessionId,
+    articleId: response.articleId,
     status: articleStatus,
   });
 }
 
 /**
- * Phase 22+ deferred — BE ArticleController endpoint 작성 후 도입.
- *
- * export function fromBackendDto(dto: ArticleBackendDto): Article { ... }
+ * rev.7 P4: BE PR #28 d9b6168 ArticleController 머지 후 활성화.
+ * GET /api/v1/articles/{id} + POST /api/v1/articles/{id}/attach 응답 → Article 합성.
+ * Article.fromBackendDto에 위임 — invariant 검증 (URL pattern) + null fallback.
+ */
+export function fromBackendDto(dto: ArticleBackendDto): Article {
+  return Article.fromBackendDto(dto);
+}
+
+/**
+ * Phase 22+ deferred — Supabase article 테이블 read 시 도입.
  * export function fromSupabaseRow(row: SupabaseArticleRow): Article { ... }
  */

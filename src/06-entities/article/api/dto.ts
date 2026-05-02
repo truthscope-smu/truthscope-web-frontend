@@ -17,13 +17,13 @@ export type AnalysisSessionStatus =
   | 'FAILED';
 
 /**
- * rev.2 CX2-01 + rev.3 R3-04/CX3-03 fix: Phase 21 BE 실측 contract.
- * `POST /analysis-sessions` 응답 — entity api 측 명명 (`05-features/analysis`의 AnalysisResponse와 동명 회피).
- * articleStatus 직접 반환 안 함 — fromAnalysisSession이 sessionStatus → articleStatus 매핑.
+ * rev.7 P21-5-1: BE PR #29 6ad70ec 머지 후 articleId 노출.
+ * `POST /analysis-sessions` 응답 shape에 articleId 추가 — FE attach wiring unblock.
  */
 export interface ArticleExtractionResponse {
   sessionId: string;
-  status: AnalysisSessionStatus; // 명시적 SessionStatus 타입 (cast 불필요)
+  status: AnalysisSessionStatus;
+  articleId: string; // rev.7 P21-5-1: BE PR #29에서 노출
 }
 
 export interface ArticleExtractionRequest {
@@ -31,14 +31,15 @@ export interface ArticleExtractionRequest {
 }
 
 /**
- * Phase 22+ deferred — BE ArticleController 작성 시 도입.
- * 본 phase에서는 사용 안 함.
+ * rev.7 P4: BE PR #28 d9b6168 ArticleController 머지 후 활성화.
+ * GET /api/v1/articles/{id} + POST /api/v1/articles/{id}/attach 응답 shape.
+ * BE auto-attach 정책으로 status는 항상 ATTACHED (실측).
  */
 export type ArticleBackendDto = {
   id: string;
   url: string;
-  title: string;
-  content: string;
+  title: string | null; // BE는 추출 진행 중이면 null
+  content: string | null;
   status: ArticleStatus;
   sessionId: string | null;
   createdAt: string;

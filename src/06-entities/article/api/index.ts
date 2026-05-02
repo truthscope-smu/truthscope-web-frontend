@@ -1,9 +1,13 @@
-export { requestArticleExtraction } from './backend';
+export {
+  requestArticleExtraction,
+  findArticleById,
+  requestAttachToSession,
+} from './backend';
 export type {
   ArticleExtractionResponse,
   ArticleExtractionRequest,
+  ArticleBackendDto,
   AnalysisSessionStatus,
 } from './dto';
-export { fromAnalysisSession } from './mappers';
-// Phase 22+ deferred: ArticleBackendDto, SupabaseArticleRow, findArticleById, requestAttachToSession,
-//                    saveArticleReaction, findArticleByIdFromSupabase, fromBackendDto, fromSupabaseRow
+export { fromAnalysisSession, fromBackendDto } from './mappers';
+// Phase 22+ deferred: SupabaseArticleRow, fromSupabaseRow, saveArticleReaction, findArticleByIdFromSupabase

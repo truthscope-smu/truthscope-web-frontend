@@ -6,7 +6,7 @@ import {
   type ArticleSnapshot,
 } from '../index';
 
-describe('Article aggregate (Phase 21 — DDD/TDD pilot, rev.1 BE-aware)', () => {
+describe('Article aggregate (Phase 21 — DDD/TDD pilot, rev.7 P21-5-1)', () => {
   const validSnapshot: ArticleSnapshot = {
     id: 'article_1',
     url: 'https://example.com/news/1',
@@ -29,18 +29,19 @@ describe('Article aggregate (Phase 21 — DDD/TDD pilot, rev.1 BE-aware)', () =>
     expect(() => Article.extract('https://example.com/x')).not.toThrow();
   });
 
-  // Case 2: fromAnalysisSession (rev.1 CX1-01 — BE AnalysisResponse → Article 합성)
-  it('fromAnalysisSession: synthesizes Article from URL + AnalysisResponse', () => {
+  // Case 2: fromAnalysisSession (rev.7 P21-5-1 — articleId 사용)
+  it('fromAnalysisSession: synthesizes Article from URL + AnalysisResponse with articleId', () => {
     const a = Article.fromAnalysisSession({
       url: 'https://example.com/news/1',
       sessionId: 'session_xyz',
+      articleId: 'article_xyz',
       status: 'EXTRACTED',
     });
     expect(a.url).toBe('https://example.com/news/1');
     expect(a.sessionId).toBe('session_xyz');
-    expect(a.id).toBe('session_xyz'); // id placeholder = sessionId until Phase 22+
+    expect(a.id).toBe('article_xyz'); // rev.7: id = articleId (BE 실 ID)
     expect(a.status).toBe('EXTRACTED');
-    expect(a.title).toContain('서버에서 추출 중'); // rev.3 CX3-04 fix: placeholder marker (한국어)
+    expect(a.title).toContain('서버에서 추출 중');
   });
 
   it('fromAnalysisSession: rejects invalid URL via InvariantViolationError', () => {
@@ -48,6 +49,7 @@ describe('Article aggregate (Phase 21 — DDD/TDD pilot, rev.1 BE-aware)', () =>
       Article.fromAnalysisSession({
         url: 'ftp://invalid',
         sessionId: 's1',
+        articleId: 'a1',
         status: 'EXTRACTED',
       })
     ).toThrow(InvariantViolationError);
@@ -86,24 +88,72 @@ describe('Article aggregate (Phase 21 — DDD/TDD pilot, rev.1 BE-aware)', () =>
     const a = Article.fromAnalysisSession({
       url: 'https://example.com/x',
       sessionId: 's1',
+      articleId: 'a1',
       status: 'EXTRACTED',
     });
     const snap = a.toSnapshot();
     const reborn = Article.rehydrate(snap);
     expect(reborn.url).toBe(a.url);
     expect(reborn.status).toBe(a.status);
+    expect(reborn.id).toBe('a1');
+  });
+});
+
+// rev.7 P4: fromBackendDto test (BE PR #28 ArticleController 응답 매핑)
+describe('Article.fromBackendDto (rev.7 P4 — BE ArticleController)', () => {
+  it('fromBackendDto: synthesizes Article from full BE response', () => {
+    const a = Article.fromBackendDto({
+      id: 'article_be_1',
+      url: 'https://example.com/news/1',
+      title: 'BE Title',
+      content: 'BE Content',
+      status: 'ATTACHED',
+      sessionId: 'session_be_1',
+      createdAt: '2026-05-02T12:00:00Z',
+    });
+    expect(a.id).toBe('article_be_1');
+    expect(a.title).toBe('BE Title');
+    expect(a.status).toBe('ATTACHED');
+    expect(a.sessionId).toBe('session_be_1');
+  });
+
+  it('fromBackendDto: null title/content fallback to placeholder', () => {
+    const a = Article.fromBackendDto({
+      id: 'article_be_2',
+      url: 'https://example.com/news/2',
+      title: null,
+      content: null,
+      status: 'EXTRACTED',
+      sessionId: null,
+      createdAt: '2026-05-02T12:00:00Z',
+    });
+    expect(a.title).toContain('서버에서 추출 중');
+    expect(a.content).toContain('서버에서 추출 중');
+  });
+
+  it('fromBackendDto: rejects invalid URL via InvariantViolationError', () => {
+    expect(() =>
+      Article.fromBackendDto({
+        id: 'article_be_3',
+        url: 'ftp://bad',
+        title: null,
+        content: null,
+        status: 'EXTRACTED',
+        sessionId: null,
+        createdAt: '2026-05-02T12:00:00Z',
+      })
+    ).toThrow(InvariantViolationError);
   });
 });
 
 // rev.4 CX4-03 fix: mapper status mapping 4 case 추가 (api adapter test).
-describe('mapSessionStatusToArticleStatus (rev.3 CX3-01)', () => {
-  // 본 함수는 mappers.ts의 internal — fromAnalysisSession을 통해 indirect 검증.
-
+describe('mapSessionStatusToArticleStatus (rev.7 P21-5-1)', () => {
   it('EXTRACTED status → fromAnalysisSession returns Article EXTRACTED', () => {
     const a = Article.fromAnalysisSession({
       url: 'https://example.com/x',
       sessionId: 's1',
-      status: 'EXTRACTED', // mapper에서 EXTRACTING → EXTRACTED 변환 후 전달된다는 가정
+      articleId: 'a1',
+      status: 'EXTRACTED',
     });
     expect(a.status).toBe('EXTRACTED');
   });
@@ -111,23 +161,33 @@ describe('mapSessionStatusToArticleStatus (rev.3 CX3-01)', () => {
   it('PENDING → mapper throws InvariantViolationError (진행 중 안내)', async () => {
     const { fromAnalysisSession: mapperFn } = await import('../api/mappers');
     expect(() =>
-      mapperFn('https://example.com/x', { sessionId: 's1', status: 'PENDING' })
+      mapperFn('https://example.com/x', {
+        sessionId: 's1',
+        status: 'PENDING',
+        articleId: 'a1',
+      })
     ).toThrow(InvariantViolationError);
   });
 
   it('FAILED → mapper throws InvariantViolationError (분석 실패)', async () => {
     const { fromAnalysisSession: mapperFn } = await import('../api/mappers');
     expect(() =>
-      mapperFn('https://example.com/x', { sessionId: 's1', status: 'FAILED' })
+      mapperFn('https://example.com/x', {
+        sessionId: 's1',
+        status: 'FAILED',
+        articleId: 'a1',
+      })
     ).toThrow(InvariantViolationError);
   });
 
-  it('EXTRACTING → mapper synthesizes Article EXTRACTED (BE 실측 success path)', async () => {
+  it('EXTRACTING → mapper synthesizes Article EXTRACTED with articleId (BE 실측 success path)', async () => {
     const { fromAnalysisSession: mapperFn } = await import('../api/mappers');
     const a = mapperFn('https://example.com/x', {
       sessionId: 's1',
       status: 'EXTRACTING',
+      articleId: 'a_real',
     });
     expect(a.status).toBe('EXTRACTED');
+    expect(a.id).toBe('a_real');
   });
 });

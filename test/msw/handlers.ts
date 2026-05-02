@@ -2,35 +2,71 @@ import { http, HttpResponse } from 'msw';
 import { config } from '@/07-shared/config/config';
 
 /**
- * rev.1 CX1-01 fix: BE PR #27 file list 실측 결과 ArticleController 부재 — `/articles/*` endpoint 없음.
- * Phase 21은 `POST /analysis-sessions` 단일 endpoint만 real wiring.
+ * rev.7 P21-5-1 contract (BE PR #28 d9b6168 + #29 6ad70ec 머지 후):
  *
- * BE 응답 shape (실제 contract):
- *   ArticleExtractionResponse { sessionId: string, status: string }
- *
- * Article class는 Layer 2 preflight + domain unit test 학습 도구로 사용.
- * `findArticleById` / `requestAttachToSession` (Phase 22+ ArticleController 작성 시 추가).
+ * 1. POST /analysis-sessions → { sessionId, status, articleId }
+ *    (PR #29 articleId 노출 — auto-attach 정책으로 즉시 ATTACHED 상태 저장)
+ * 2. GET /articles/{id} → ArticleResponse { id, url, title, content, status, sessionId, createdAt }
+ *    (PR #28 ArticleController.findById)
+ * 3. POST /articles/{id}/attach { sessionId } → 200 ArticleResponse | 409 ConflictException
+ *    (PR #28 ArticleController.attach — auto-attach 정책으로 재호출은 항상 409)
  */
 
-// rev.3 R3-04/CX3-03 fix: 기존 `05-features/analysis/model/types.ts`의 AnalysisResponse와 동명 충돌 회피.
-// entity api에서는 ArticleExtractionResponse로 명명 분리 (BE는 동일 endpoint, FE는 의미별 type).
 interface ArticleExtractionResponse {
   sessionId: string;
   status: string;
+  articleId: string;
 }
 
+interface ArticleResponse {
+  id: string;
+  url: string;
+  title: string | null;
+  content: string | null;
+  status: 'EXTRACTED' | 'ATTACHED';
+  sessionId: string | null;
+  createdAt: string;
+}
+
+interface ApiErrorResponse {
+  status: string;
+  statusCode: number;
+  message: string;
+}
+
+const TEST_ARTICLE_ID = '00000000-0000-0000-0000-000000000001';
+const TEST_SESSION_ID = 'session_test_1';
+
 export const handlers = [
-  // Phase 21 IN scope: 유일한 real BE endpoint
+  // 1. extract-article real endpoint
   http.post(`${config.api.baseUrl}/analysis-sessions`, async () => {
-    // rev.3 R3-02/CX3-01 fix: BE 성공 응답 정상 status는 'EXTRACTING' (실측).
     const response: ArticleExtractionResponse = {
-      sessionId: 'session_test_1',
+      sessionId: TEST_SESSION_ID,
       status: 'EXTRACTING',
+      articleId: TEST_ARTICLE_ID,
     };
     return HttpResponse.json(response, { status: 201 });
   }),
-  // Phase 22+ OUT-OF-SCOPE:
-  // - `GET /articles/:id` (BE controller 작성 후)
-  // - `POST /articles/:id/attach` (BE attach endpoint 작성 후)
-  // - Supabase REST (PostgREST shape)
+  // 2. findArticleById real endpoint (rev.7)
+  http.get(`${config.api.baseUrl}/articles/:id`, async ({ params }) => {
+    const response: ArticleResponse = {
+      id: params.id as string,
+      url: 'https://example.com/test-article',
+      title: 'Test Article',
+      content: 'Test content body',
+      status: 'ATTACHED',
+      sessionId: TEST_SESSION_ID,
+      createdAt: '2026-05-02T12:00:00Z',
+    };
+    return HttpResponse.json(response, { status: 200 });
+  }),
+  // 3. attach real endpoint — A4 reframe로 항상 409 (재부착 거부 invariant)
+  http.post(`${config.api.baseUrl}/articles/:id/attach`, async () => {
+    const error: ApiErrorResponse = {
+      status: 'CONFLICT',
+      statusCode: 409,
+      message: '이 기사는 이미 분석 세션에 부착되어 있습니다',
+    };
+    return HttpResponse.json(error, { status: 409 });
+  }),
 ];
