@@ -53,6 +53,16 @@ const eslintConfig = defineConfig([
     },
   },
 
+  // Phase 21 W2 — slice 내부 __tests__/**/*.test.* 와 형제 *.test.* 는 slice 일부.
+  // dep-cruiser exclude(.test.tsx?$)와 정합 — fsd 룰 비활성화.
+  {
+    files: ['src/**/__tests__/**/*.{ts,tsx}', 'src/**/*.test.{ts,tsx}'],
+    rules: {
+      'fsd/no-relative-imports': 'off',
+      'fsd/no-public-api-sidestep': 'off',
+    },
+  },
+
   // Override default ignores
   globalIgnores([
     '.next/**',
