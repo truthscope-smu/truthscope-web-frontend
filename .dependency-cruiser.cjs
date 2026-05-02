@@ -49,12 +49,20 @@ module.exports = {
     // dep-cruiser 백레퍼런스(`\1`)가 `to.path` / `to.pathNot` 양쪽에서 same-slice 내부 import를 false positive로 잡음
     // (dep-cruiser 17.3.10 실측, 2026-05-02). PLAN T1.2 rev.3 R3-03 의 "dep-cruiser 단독" 인용은 ADR과 contradiction —
     // ADR-006 §책임 분리표 결정 요약 "fsd-lint no-relative-imports + forbidden-imports만" 그대로 따름.
+    // R5 — Provider Mount은 app/에서만 (consumer hook import는 허용)
+    // PLAN rev.4까지의 spec은 `to: ^src/app/providers/` 전체 차단이었으나, useArticle 같은
+    // consumer hook도 같은 폴더에 co-locate되므로 features/widgets에서 hook import 시 false positive.
+    // Phase 21 W3 실측: extract-article-form → useArticle 정상 패턴이지만 R5 위반으로 잡힘 (2026-05-02).
+    // 수정: filename pattern으로 narrow — `*provider.tsx` (실제 Provider component file)만 차단.
+    // `article.context.tsx` 같은 context+hook 통합 파일은 R5 scope 외 (consumer hook 허용).
+    // 의도된 mount-만-차단 정책은 코드 리뷰 영역으로 이관 (CLAUDE.md FSD 규칙).
     {
-      name: 'R5-app-is-only-provider-entry',
-      comment: 'Provider components must mount in app/, not slice internals',
+      name: 'R5-provider-mount-only-in-app',
+      comment:
+        '*provider.tsx component file은 app/ 외부에서 import 금지 (mounting 차단). consumer hook은 허용.',
       severity: 'error',
       from: { pathNot: '^src/app/' },
-      to: { path: '^src/app/providers/' },
+      to: { path: '^src/app/providers/.*provider\\.tsx?$' },
     },
     {
       name: 'Q3-entity-model-no-api',

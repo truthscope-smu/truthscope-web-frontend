@@ -63,6 +63,17 @@ const eslintConfig = defineConfig([
     },
   },
 
+  // Phase 21 W3 — src/app/** 은 Next.js App Router 라우팅 폴더. FSD 의 "slice" 개념 아님.
+  // app/analysis 와 app/providers 는 cross-slice가 아니라 routing/ + provider 의 정상 통합 패턴.
+  // 동일 layer 내 직접 import 패턴 (예: app/analysis/layout.tsx → app/providers/article.context)이
+  // 정상이므로 fsd/no-cross-slice-dependency 비활성. 단 fsd/forbidden-imports + arch R5 (provider mount-block) 유지.
+  {
+    files: ['src/app/**/*.{ts,tsx}'],
+    rules: {
+      'fsd/no-cross-slice-dependency': 'off',
+    },
+  },
+
   // Override default ignores
   globalIgnores([
     '.next/**',
