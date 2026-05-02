@@ -53,8 +53,7 @@ test-results/
 .vscode/
 *.swp
 
-# AI generated
-AGENTS.md
+# AGENTS.md는 팀 공유 — gitignore 제거 (Sprint 2 Sprint 멤버 onboarding 의무 자료)
 
 # Accidental empty files from mistaken shell redirects at repo root
 /next
