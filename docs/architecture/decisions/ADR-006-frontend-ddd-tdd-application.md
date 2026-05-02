@@ -145,3 +145,51 @@ Aggregate 적용 기준:
 | Cookie / SSR session 전파 | RSC + Playwright E2E 영역 | E2E phase |
 | Cache Components (Next 16 'use cache') | rendering mental model 변경 | Next.js 16 stable + Phase 21 안정화 후 |
 | Storybook + Code Connect | Phase 21 자산 재사용 순서 | Phase 21 머지 + W5 docs guide 작성 후 |
+
+## Implementation footnote — W0~W3+W5 BE 무관 영역 done (2026-05-02 partial)
+
+W0~W3 BE 무관 영역 + W5 docs/guides 완료 (PR #24 draft). 14a Revision adoption signal
+일부 박제 (verify 통과 + 옵시디언 history는 W4 + BE phase 21-5 머지 후 완성).
+
+### 실측 metric (PR #24 draft 시점)
+
+| 항목 | 값 |
+|---|---|
+| 총 commits | 17 (W0=3 / W1=5 / W2=4 / W3=4 / W5=2 일부, +1 ongoing) |
+| Article unit test | **13/13 PASS** (Article 9 + mapper 4) — Gate G3 ≥5 충족 |
+| dep-cruiser violations | 0 (83 modules / 137 deps cruised) |
+| build status | PASS (7 routes — analysis/[id] dynamic + analysis/new static) |
+| revision trigger 1차 (4h LOCK) | **7분 19초** (T2.1 19:24:27 → T2.5 19:31:46) ≪ 4h |
+| 추가 install (PLAN 누락 보정) | jsdom (vitest 4 environment 의존), clsx + tailwind-merge (cn util CX1-07 사전) |
+
+### 사람 수정 결정점 — Phase 21 (8건)
+
+Q2 kebab-case + Q3 hybrid → 축소 (single BE adapter + Supabase Phase 22+ deferred) +
+Q5 2-project + Q6 msw + vi.mock + Q7 subtree mount → parent /analysis layout 격상 +
+Q9 cacheComponents off + Q10 최소 D (extract + card + attach 시연) + Q11 Phase 22+ defer.
+
+### Implementation 시점 발생 추가 deviation (4건)
+
+PLAN spec과 실측 차이 — 모두 PR description 박제:
+
+1. **`no-cross-feature-import` dep-cruiser 룰 제거** (W1 T1.2): dep-cruiser 17.3.10 백레퍼런스 false positive. ADR §책임 분리표 row 15 정합 — fsd-lint 단독.
+2. **`jsdom` 추가 install** (W2 T2.5): vitest 4 environment:'jsdom' 분리 패키지화. PLAN T0.3 12 packages 누락.
+3. **dep-cruiser R5 narrow** (W3 T3.4): consumer hook (`useArticle`) 차단 false positive. `*provider.tsx` filename pattern으로 narrow.
+4. **apiClient barrel 우회** (W3 hotfix): `@/07-shared/api` barrel이 server-only `getSupabaseServerClient` re-export하여 client bundle 폴루션 → next build 실패. 기존 CheckMate 패턴(`05-features/analysis/api.ts:1`) 정합.
+
+### W3 BE 의존 영역 (W-1b 게이트 통과 후 진행 의무)
+
+- T3.3 `05-features/attach-to-session/` (real wiring against BE phase 21-5 endpoint)
+- T3.4 `app/analysis/[id]/page.tsx` actions slot — `<AttachToSessionButton />` 주입
+- W4 T4.1 attach feature integration test (BE endpoint shape 정합)
+
+### W4 BE 무관 영역 (이번 phase 산출 deferred)
+
+- T4.2 widget browser test (Playwright Chromium)
+- T4.3 architecture test (dep-cruiser programmatic API gate G3)
+- T4.4 verify CHECKLIST + 코드 라인 수 delta 측정
+
+### 옵시디언 history (verify 통과 후 박제 의무)
+
+`Team-project/checkmate-web/history/2026-MM-DD-phase-21-frontend-ddd-tdd.md` —
+14a Revision adoption signal 6항목 정량 박제 (T5.2 §옵시디언 history 표 정합).
