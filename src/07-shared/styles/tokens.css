@@ -12,13 +12,17 @@
   --color-blue-700: #285c9f;
   --color-blue-500: #379ee6;
   --color-blue-400: #0096ff;
+  --color-blue-200: #b8d4f5;
   --color-blue-100: #d2e6ff;
   --color-blue-50: #f0f7ff;
   --color-purple-600: #681abb;
   --color-gray-700: #444444;
+  --color-gray-200: #e5e7eb;
+  --color-gray-100: #f3f4f6;
   --color-green-600: #16a34a;
   --color-green-50: #f0fdf4;
   --color-red-600: #dc2626;
+  --color-red-50: #fef2f2;
 
   /* --------------------------------------------------
    * Semantic Tokens — 항상 이것을 사용
@@ -33,9 +37,17 @@
   --color-accent-blue: var(--color-blue-400);
   --color-accent-purple: var(--color-purple-600);
 
-  /* 배경 */
+  /* 배경 — surface 5단계 (Phase 22 v2: base/sunken/raised/elevated/floating) */
   --color-bg-base: #ffffff;
-  --color-bg-surface: var(--color-blue-50);
+  --color-bg-surface-base: #ffffff;
+  --color-bg-surface-sunken: var(--color-gray-100);
+  --color-bg-surface-raised: var(--color-blue-50);
+  --color-bg-surface-elevated: var(--color-blue-100);
+  --color-bg-surface-floating: var(--color-blue-200);
+  --color-bg-surface: var(--color-bg-surface-raised); /* alias of raised, 기존 코드 호환 */
+
+  /* 경계 — outline-variant 대체 */
+  --color-border-subtle: var(--color-gray-200);
 
   /* 텍스트 */
   --color-text-primary: #000000;
@@ -43,12 +55,14 @@
   --color-text-heading: var(--color-blue-900);
   --color-text-accent: var(--color-blue-700);
   --color-text-on-brand: #ffffff;
+  --color-text-on-error: #ffffff;
 
   /* 상태 */
   --color-info: var(--color-blue-500);
   --color-success-strong: var(--color-green-600);
   --color-success-subtle: var(--color-green-50);
   --color-error: var(--color-red-600);
+  --color-error-subtle: var(--color-red-50);
 
   /* --------------------------------------------------
    * Typography Tokens
