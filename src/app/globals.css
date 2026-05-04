@@ -15,6 +15,40 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Phase 22 v2 — brand-* alias (Tailwind v4 utility 자동 생성) */
+  --color-brand-primary: var(--color-brand-primary);
+  --color-brand-secondary: var(--color-brand-secondary);
+  --color-brand-subtle: var(--color-brand-subtle);
+
+  /* Phase 22 v2 — surface 5단계 alias */
+  --color-bg-surface-base: var(--color-bg-surface-base);
+  --color-bg-surface-sunken: var(--color-bg-surface-sunken);
+  --color-bg-surface-raised: var(--color-bg-surface-raised);
+  --color-bg-surface-elevated: var(--color-bg-surface-elevated);
+  --color-bg-surface-floating: var(--color-bg-surface-floating);
+
+  /* Phase 22 v2 — border / error / text-on-* alias */
+  --color-border-subtle: var(--color-border-subtle);
+  --color-error: var(--color-error);
+  --color-error-subtle: var(--color-error-subtle);
+  --color-text-on-error: var(--color-text-on-error);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-heading: var(--color-text-heading);
+  --color-text-on-brand: var(--color-text-on-brand);
+
+  /* Phase 22 v2 — typography Tailwind v4 --text-* namespace (Δ10, line-height 보존) */
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.6;
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.6;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.5;
+  --text-label-md: 14px;
+  --text-label-md--line-height: 1.4;
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 1.4;
 }
 
 html,
