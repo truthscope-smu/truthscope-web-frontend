@@ -40,7 +40,8 @@ lint.json
 .vercel
 
 # Local planning
-.claude/
+.claude/*
+!.claude/rules/
 .plans/
 context/
 
