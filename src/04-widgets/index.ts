@@ -4,3 +4,11 @@
 export { Navbar } from './navbar';
 export { Footer } from './footer';
 export { ArticleCard } from './article-card';
+export { ResultCard } from './result-card';
+export type {
+  ResultCardSnapshot,
+  FactCheckSnapshot,
+  ContextSnapshot,
+  RelatedArticleRef,
+  Verdict,
+} from './result-card';
