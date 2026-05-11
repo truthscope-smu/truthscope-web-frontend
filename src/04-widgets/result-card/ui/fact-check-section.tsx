@@ -14,7 +14,7 @@ interface VerdictDisplay {
 
 const VERDICT_DISPLAY: Record<Verdict, VerdictDisplay> = {
   TRUE: { label: '사실', icon: '✓', tone: 'success' },
-  PARTIAL: { label: '부분 사실', icon: '◐', tone: 'subtle' },
+  PARTIAL: { label: '부분 사실', icon: '◑', tone: 'subtle' },
   FALSE: { label: '거짓', icon: '✕', tone: 'error' },
   UNVERIFIED: { label: '검증 불가', icon: '?', tone: 'neutral' },
   PENDING: { label: '검증 중', icon: '⋯', tone: 'info' },
