@@ -141,7 +141,7 @@ npm run build                # 9. Next 16 build
 ✅test(article): fromBackendDto 3 cases 추가
 ```
 
-Co-authored-by 의무 (PM 본인): `Co-authored-by: gs07103 <gwonseok02@gmail.com>`
+Co-authored-by 의무 (PM 본인): `Co-authored-by: KWONSEOK02 <gwonseok02@gmail.com>` (2026-05-23 통일, 이전 `gs07103` deprecated)
 
 ---
 
