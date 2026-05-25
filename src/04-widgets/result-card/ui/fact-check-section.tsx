@@ -3,31 +3,49 @@
 import { useId } from 'react';
 import { cn } from '@/07-shared/lib/cn';
 import type {
+  ClaimScoreStatus,
   FactCheckSnapshot,
-  Verdict,
+  TruthLabel,
 } from '@04-widgets/result-card/model/types';
 
 interface VerdictDisplay {
   label: string;
   icon: string;
-  tone: 'success' | 'error' | 'info' | 'subtle' | 'neutral';
+  tone:
+    | 'success'
+    | 'success-soft'
+    | 'mixed'
+    | 'error-soft'
+    | 'error'
+    | 'info'
+    | 'neutral';
 }
 
-const VERDICT_DISPLAY: Record<Verdict, VerdictDisplay> = {
-  TRUE: { label: '사실', icon: '✓', tone: 'success' },
-  PARTIAL: { label: '부분 사실', icon: '◑', tone: 'subtle' },
-  FALSE: { label: '거짓', icon: '✕', tone: 'error' },
-  UNVERIFIED: { label: '검증 불가', icon: '?', tone: 'neutral' },
-  PENDING: { label: '검증 중', icon: '⋯', tone: 'info' },
+const TRUTH_LABEL_DISPLAY: Record<TruthLabel, VerdictDisplay> = {
+  FACT: { label: '사실', icon: '✓', tone: 'success' },
+  MOSTLY_FACT: { label: '대체로 사실', icon: '✓', tone: 'success-soft' },
+  PARTLY_FACT: { label: '일부 사실', icon: '◑', tone: 'mixed' },
+  MOSTLY_NOT_FACT: { label: '대체로 사실 아님', icon: '✕', tone: 'error-soft' },
+  NOT_FACT: { label: '사실 아님', icon: '✕', tone: 'error' },
+};
+
+const STATUS_DISPLAY: Record<ClaimScoreStatus, VerdictDisplay> = {
+  INSUFFICIENT: { label: '근거 부족', icon: '?', tone: 'neutral' },
+  TIME_SENSITIVE: { label: '시점 의존', icon: '⋯', tone: 'info' },
+  OUT_OF_SCOPE: { label: '검증 범위 밖', icon: '—', tone: 'neutral' },
 };
 
 const TONE_CLASS: Record<VerdictDisplay['tone'], string> = {
   success:
     'bg-[var(--color-success-subtle)] text-[var(--color-success-strong)] ring-[var(--color-success-strong)]/30',
+  'success-soft':
+    'bg-[var(--color-success-subtle)] text-[var(--color-success-strong)]/80 ring-[var(--color-success-strong)]/20',
+  mixed: 'bg-brand-subtle text-brand-primary ring-brand-primary/30',
+  'error-soft':
+    'bg-[var(--color-error-subtle)] text-[var(--color-error)]/80 ring-[var(--color-error)]/20',
   error:
     'bg-[var(--color-error-subtle)] text-[var(--color-error)] ring-[var(--color-error)]/30',
   info: 'bg-[var(--color-blue-50)] text-[var(--color-info)] ring-[var(--color-info)]/30',
-  subtle: 'bg-brand-subtle text-brand-primary ring-brand-primary/30',
   neutral:
     'bg-[var(--color-bg-surface-sunken)] text-[var(--color-text-secondary)] ring-[var(--color-border-subtle)]',
 };
@@ -39,8 +57,13 @@ interface Props {
 
 export function FactCheckSection({ snapshot, className }: Props) {
   const titleId = useId();
-  const verdict = snapshot?.verdict;
-  const display = verdict ? VERDICT_DISPLAY[verdict] : null;
+  const display = snapshot?.truthLabel
+    ? TRUTH_LABEL_DISPLAY[snapshot.truthLabel]
+    : snapshot?.status
+      ? STATUS_DISPLAY[snapshot.status]
+      : null;
+  const showConfidence =
+    typeof snapshot?.confidence === 'number' && Boolean(snapshot?.truthLabel);
 
   return (
     <section
@@ -95,12 +118,12 @@ export function FactCheckSection({ snapshot, className }: Props) {
           <p className="text-xs uppercase tracking-wide text-[var(--color-text-secondary)]">
             근거
           </p>
-          {typeof snapshot?.confidence === 'number' && (
+          {showConfidence && (
             <p
-              aria-label={`신뢰도 ${snapshot.confidence}퍼센트`}
+              aria-label={`신뢰도 ${snapshot?.confidence}퍼센트`}
               className="text-xs text-[var(--color-text-secondary)] tabular-nums"
             >
-              신뢰도 {snapshot.confidence}%
+              신뢰도 {snapshot?.confidence}%
             </p>
           )}
         </div>

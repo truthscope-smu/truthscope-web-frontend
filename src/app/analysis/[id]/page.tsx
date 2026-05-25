@@ -22,13 +22,13 @@ export default function AnalysisDetailPage() {
     </Link>
   );
 
-  // Sprint 4 BE 매핑 전 임시 ResultCardSnapshot. Task #10 후속 PR에서 verdict 5종 정본
-  // (FACT/MOSTLY_FACT/PARTLY_FACT/MOSTLY_NOT_FACT/NOT_FACT + 비판정 3종) + Spring Boot
-  // AnalysisSession.completeCascade 응답 매핑으로 교체된다.
+  // Sprint 4 BE 매핑 전 임시 snapshot. truthLabel/status 둘 다 undefined로 두면
+  // SkeletonPill이 자동 표시되어 "분석 대기 중" 상태가 시각으로 전달된다.
+  // BE Spring Boot AnalysisSession.completeCascade 응답이 들어오면 truthLabel(5종)
+  // 또는 status(3종)와 confidence/evidence가 채워지는 매핑으로 교체된다.
   const cardSnapshot: ResultCardSnapshot | undefined = snapshot
     ? {
         factCheck: {
-          verdict: 'PENDING',
           claim: snapshot.title,
         },
         context: {
