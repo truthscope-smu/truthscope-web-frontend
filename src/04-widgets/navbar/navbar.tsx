@@ -1,28 +1,29 @@
 import Link from 'next/link';
 
 const NAV_LINKS = [
-  { label: 'Fact Check', href: '/' },
-  { label: 'Methodology', href: '/about#how-it-works' },
-  { label: 'Archive', href: '/history' },
-  { label: 'About', href: '/about' },
+  { label: '홈', href: '/' },
+  { label: '분석 시작', href: '/analysis/new' },
+  { label: '방법론', href: '/about#how-it-works' },
+  { label: '기록', href: '/history' },
+  { label: '소개', href: '/about' },
 ] as const;
 
 function Navbar() {
   return (
-    <nav className="mx-auto flex w-full max-w-7xl min-h-[var(--nav-height)] items-center justify-between border-b px-6 py-3 sm:px-8">
+    <nav className="mx-auto flex min-h-[52px] w-full max-w-7xl flex-wrap items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-base)]/90 px-[var(--spacing-20)] py-[var(--spacing-8)] backdrop-blur-xl sm:px-[var(--spacing-32)]">
       <Link
         href="/"
-        className="font-display text-[var(--color-text-heading)] font-bold"
+        className="font-pretendard text-base font-semibold text-[var(--color-text-heading)]"
       >
         TruthScope
       </Link>
 
-      <ul className="hidden md:flex items-center gap-8">
+      <ul className="order-3 mt-[var(--spacing-8)] flex w-full items-center justify-center gap-[var(--spacing-20)] border-t border-[var(--color-border-subtle)] pt-[var(--spacing-8)] md:order-none md:mt-0 md:w-auto md:gap-[var(--spacing-24)] md:border-t-0 md:pt-0">
         {NAV_LINKS.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="font-pretendard text-[var(--color-text-primary)] transition-colors hover:text-[var(--color-text-accent)]"
+              className="font-pretendard text-sm text-[var(--color-text-primary)] transition-colors hover:text-[var(--color-brand-secondary)]"
             >
               {link.label}
             </Link>
@@ -30,30 +31,20 @@ function Navbar() {
         ))}
       </ul>
 
-      <div className="hidden md:flex items-center gap-6">
+      <div className="flex items-center gap-[var(--spacing-10)]">
         <button
-          className="font-pretendard text-[var(--color-text-primary)]"
+          className="hidden font-pretendard text-sm text-[var(--color-text-primary)] transition-colors hover:text-[var(--color-brand-secondary)] md:inline-flex"
           type="button"
         >
           로그인
         </button>
         <Link
-          href="/#analysis-form"
-          className="font-pretendard rounded-lg bg-[var(--color-brand-primary)] px-6 py-2 font-bold text-[var(--color-text-on-brand)] transition-colors hover:bg-[var(--color-brand-secondary)]"
+          href="/analysis/new"
+          className="inline-flex h-8 items-center rounded-full bg-[var(--color-brand-primary)] px-[var(--spacing-16)] font-pretendard text-sm font-medium text-[var(--color-text-on-brand)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]"
         >
-          Get Started
+          분석하기
         </Link>
       </div>
-
-      <button
-        className="md:hidden flex flex-col gap-1"
-        type="button"
-        aria-label="메뉴 열기"
-      >
-        <span className="block w-6 h-0.5 bg-[var(--color-text-primary)]"></span>
-        <span className="block w-6 h-0.5 bg-[var(--color-text-primary)]"></span>
-        <span className="block w-6 h-0.5 bg-[var(--color-text-primary)]"></span>
-      </button>
     </nav>
   );
 }

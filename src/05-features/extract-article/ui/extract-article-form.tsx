@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -22,42 +23,35 @@ export function ExtractArticleForm() {
     setError(null);
     setPending(true);
 
-    // Layer 1: zod request body shape
-    const parsed = ExtractArticleRequestSchema.safeParse({ url });
+    const parsed = ExtractArticleRequestSchema.safeParse({ url: url.trim() });
     if (!parsed.success) {
-      setError('URL은 http(s)로 시작해야 합니다');
+      setError('http(s)로 시작하는 기사 URL을 입력해 주세요.');
       setPending(false);
       return;
     }
 
-    // Layer 2: rev.1 R1-01 fix — Article.extract(url) single param. validation-only (no return).
     try {
       Article.extract(parsed.data.url);
     } catch (e) {
       if (e instanceof InvariantViolationError) {
-        setError(`URL 검증 실패: ${e.message}`);
+        setError(e.message);
         setPending(false);
         return;
       }
       throw e;
     }
 
-    // Layer 3: external boundary (apiClient + AppError)
-    // rev.1 CX1-01: requestArticleExtraction이 AnalysisResponse를 받아 fromAnalysisSession으로 Article 합성.
-    // rev.2 R2-01/CX2-03 fix: setSnapshot 후 router.push로 분석 결과 페이지 navigate 의무.
-    // rev.2 CX2-01 fix: SessionStatus → ArticleStatus 매핑 실패 시 InvariantViolationError catch.
     try {
       const article = await requestArticleExtraction(parsed.data.url);
-      setSnapshot(article.toSnapshot()); // synthesized Article → Provider state
-      router.push(`/analysis/${article.id}`); // sibling layout 안에 있어서 Provider state 보존
+      setSnapshot(article.toSnapshot());
+      router.push(`/analysis/${article.id}`);
     } catch (e) {
       if (e instanceof InvariantViolationError) {
-        // sessionStatus 매핑 실패 (PENDING/EXTRACTING/ANALYZING/FAILED 등)
         setError(e.message);
       } else if (e instanceof AppError) {
-        setError(`서버 요청 실패: ${e.message}`);
+        setError(`분석 요청에 실패했습니다. ${e.message}`);
       } else {
-        setError('알 수 없는 오류');
+        setError('분석 요청 중 알 수 없는 오류가 발생했습니다.');
       }
     } finally {
       setPending(false);
@@ -65,19 +59,50 @@ export function ExtractArticleForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="url"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="https://..."
+    <form className="mt-[var(--spacing-24)]" onSubmit={handleSubmit}>
+      <label
+        className="block text-sm text-[var(--color-text-secondary)]"
+        htmlFor="analysis-url"
+      >
+        분석할 기사 URL
+      </label>
+      <div className="mt-[var(--spacing-10)] flex min-h-12 items-center rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface-base)] px-[var(--spacing-16)]">
+        <input
+          aria-describedby={error ? 'analysis-url-error' : undefined}
+          aria-invalid={Boolean(error)}
+          className="min-w-0 flex-1 bg-transparent text-base text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-secondary)] disabled:cursor-not-allowed"
+          disabled={pending}
+          id="analysis-url"
+          onChange={(e) => {
+            setUrl(e.target.value);
+            if (error) {
+              setError(null);
+            }
+          }}
+          placeholder="https://..."
+          type="url"
+          value={url}
+        />
+      </div>
+      <button
+        className="mt-[var(--spacing-16)] inline-flex h-10 w-full items-center justify-center rounded-full bg-[var(--color-action-hero)] px-[var(--spacing-20)] text-base font-medium text-[var(--color-text-on-brand)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] disabled:cursor-not-allowed disabled:opacity-60"
         disabled={pending}
-        aria-label="기사 URL"
-      />
-      <button type="submit" disabled={pending}>
-        {pending ? '분석 중...' : '분석'}
+        type="submit"
+      >
+        {pending ? '분석 중' : '분석 시작'}
       </button>
-      {error && <p role="alert">{error}</p>}
+      <p className="mt-[var(--spacing-16)] text-xs leading-5 text-[var(--color-text-secondary)]">
+        분석 결과는 참고용이며, 최종 판단을 대체하지 않습니다.
+      </p>
+      {error && (
+        <p
+          className="mt-[var(--spacing-10)] text-sm font-semibold text-[var(--color-error)]"
+          id="analysis-url-error"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
     </form>
   );
 }
