@@ -27,6 +27,9 @@ export function ResultCard({ snapshot, className }: Props) {
         className="h-px bg-[var(--color-border-subtle)]"
       />
       <ContextSection snapshot={snapshot?.context} />
+      <p className="px-[var(--spacing-24)] pb-[var(--spacing-16)] text-xs text-[var(--color-text-secondary)]">
+        AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.
+      </p>
     </article>
   );
 }

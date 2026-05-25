@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import { cn } from '@/07-shared/lib/cn';
 import type {
   FactCheckSnapshot,
@@ -37,12 +38,13 @@ interface Props {
 }
 
 export function FactCheckSection({ snapshot, className }: Props) {
+  const titleId = useId();
   const verdict = snapshot?.verdict;
   const display = verdict ? VERDICT_DISPLAY[verdict] : null;
 
   return (
     <section
-      aria-labelledby="result-card-fact-check-title"
+      aria-labelledby={titleId}
       className={cn(
         'flex flex-col gap-[var(--spacing-16)] p-[var(--spacing-24)]',
         className
@@ -50,7 +52,7 @@ export function FactCheckSection({ snapshot, className }: Props) {
     >
       <header className="flex items-center justify-between gap-[var(--spacing-16)]">
         <h3
-          id="result-card-fact-check-title"
+          id={titleId}
           className="text-[var(--color-text-heading)] text-lg font-semibold"
         >
           팩트체크

@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import { cn } from '@/07-shared/lib/cn';
 import type { ContextSnapshot } from '@04-widgets/result-card/model/types';
 
@@ -9,11 +10,12 @@ interface Props {
 }
 
 export function ContextSection({ snapshot, className }: Props) {
+  const titleId = useId();
   const hasRelated = !!snapshot?.relatedArticles?.length;
 
   return (
     <section
-      aria-labelledby="result-card-context-title"
+      aria-labelledby={titleId}
       className={cn(
         'flex flex-col gap-[var(--spacing-16)] p-[var(--spacing-24)]',
         className
@@ -21,7 +23,7 @@ export function ContextSection({ snapshot, className }: Props) {
     >
       <header className="flex items-center justify-between gap-[var(--spacing-16)]">
         <h3
-          id="result-card-context-title"
+          id={titleId}
           className="text-[var(--color-text-heading)] text-lg font-semibold"
         >
           맥락
