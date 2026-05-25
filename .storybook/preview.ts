@@ -1,7 +1,7 @@
 import type { Preview } from '@storybook/nextjs-vite';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 // Tailwind CSS 및 전역 스타일 적용을 위해 globals.css 임포트함
-import '../src/app/globals.css';
+import '@/app/globals.css';
 
 // MSW 환경 초기화 수행함 (onUnhandledRequest 설정으로 모킹되지 않은 요청 경고 무시함)
 initialize({
