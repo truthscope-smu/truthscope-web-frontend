@@ -62,3 +62,6 @@ test-results/
 
 # code-review-graph MCP cache (auto-generated, local only)
 .code-review-graph/
+
+# Storybook build output
+storybook-static/
