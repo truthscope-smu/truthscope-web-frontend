@@ -1,28 +1,29 @@
 import Link from 'next/link';
 
 const NAV_LINKS = [
-  { label: 'Fact Check', href: '/' },
-  { label: 'Methodology', href: '/about#how-it-works' },
-  { label: 'Archive', href: '/history' },
-  { label: 'About', href: '/about' },
+  { label: '홈', href: '/' },
+  { label: '분석 시작', href: '/analysis/new' },
+  { label: '방법론', href: '/about#how-it-works' },
+  { label: '기록', href: '/history' },
+  { label: '소개', href: '/about' },
 ] as const;
 
 function Navbar() {
   return (
-    <nav className="mx-auto flex w-full max-w-7xl min-h-[var(--nav-height)] items-center justify-between border-b px-6 py-3 sm:px-8">
+    <nav className="mx-auto flex min-h-[52px] w-full max-w-7xl flex-wrap items-center justify-between border-b border-[#d2d2d7] bg-white/90 px-5 py-2 backdrop-blur-xl sm:px-8">
       <Link
         href="/"
-        className="font-display text-[var(--color-text-heading)] font-bold"
+        className="font-pretendard text-[15px] font-semibold tracking-[-0.18px] text-[#1d1d1f]"
       >
         TruthScope
       </Link>
 
-      <ul className="hidden md:flex items-center gap-8">
+      <ul className="order-3 mt-2 flex w-full items-center justify-center gap-5 border-t border-[#ededf0] pt-2 md:order-none md:mt-0 md:w-auto md:gap-7 md:border-t-0 md:pt-0">
         {NAV_LINKS.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="font-pretendard text-[var(--color-text-primary)] transition-colors hover:text-[var(--color-text-accent)]"
+              className="font-pretendard text-[13px] tracking-[-0.08px] text-[#424245] transition-colors hover:text-[#0066cc]"
             >
               {link.label}
             </Link>
@@ -30,30 +31,20 @@ function Navbar() {
         ))}
       </ul>
 
-      <div className="hidden md:flex items-center gap-6">
+      <div className="flex items-center gap-3">
         <button
-          className="font-pretendard text-[var(--color-text-primary)]"
+          className="hidden font-pretendard text-[13px] tracking-[-0.08px] text-[#424245] transition-colors hover:text-[#0066cc] md:inline-flex"
           type="button"
         >
           로그인
         </button>
         <Link
-          href="/#analysis-form"
-          className="font-pretendard rounded-lg bg-[var(--color-brand-primary)] px-6 py-2 font-bold text-[var(--color-text-on-brand)] transition-colors hover:bg-[var(--color-brand-secondary)]"
+          href="/analysis/new"
+          className="inline-flex h-8 items-center rounded-full bg-[#0071e3] px-4 font-pretendard text-[13px] font-medium tracking-[-0.08px] text-white transition-colors hover:bg-[#0077ed]"
         >
-          Get Started
+          분석하기
         </Link>
       </div>
-
-      <button
-        className="md:hidden flex flex-col gap-1"
-        type="button"
-        aria-label="메뉴 열기"
-      >
-        <span className="block w-6 h-0.5 bg-[var(--color-text-primary)]"></span>
-        <span className="block w-6 h-0.5 bg-[var(--color-text-primary)]"></span>
-        <span className="block w-6 h-0.5 bg-[var(--color-text-primary)]"></span>
-      </button>
     </nav>
   );
 }
