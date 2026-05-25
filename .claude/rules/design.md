@@ -90,3 +90,29 @@ TruthScope = utility/content 사이트, Apple = commerce. **일반 원칙만 차
 | 단일 product shadow | §2 shadow 정책 정합 | 모든 floating에 남발 X |
 | surface 위계 (정보 차원) | 5단계 semantic surface (`base/sunken/raised/elevated/floating`) | dramatic dark alternation X |
 | primary CTA 일관성 | 분석 시작 등 핵심 액션 | 분석 필터/툴바는 compact control |
+
+### 6. hero CTA 전용 action-hero 예외 (Phase 22 rev.1, 2026-05-25)
+
+§1 "Primary action / confidence signal은 brand-primary 기본값. 두 번째 primary accent 도입 금지" 룰의 명시 예외 1건이다.
+
+**규칙**:
+- 분석 시작 페이지(`/analysis/new`)의 hero pill CTA 1곳에만 `--color-action-hero: #0071e3` 사용 허용.
+- ResultCard / 일반 CTA / 다른 페이지의 primary action 사용 금지 — brand-primary 유지.
+- 신규 hero CTA 추가 시 design 회의 결정 의무.
+
+**근거**:
+- light gradient hero canvas (white → #f8f8fb → #f1f1f5)에서 brand-primary blue-900 (#0f2d52)이 가시성 부족.
+- 진입점 CTA는 가독성과 클릭 유도가 핵심 — 학술 톤보다 가벼운 action blue가 유효.
+- 단일 영역 한정으로 §1 단일 시그니파이어 원칙 손상 최소화 (5/26 D-1 결정, 사용자 명시).
+
+**WCAG 검증 의무**:
+- `#0071e3` on white surface: 4.07:1 (AA Large only, normal text 미충족).
+- hero pill CTA 텍스트 크기 ≥ 18px (Large text 기준) 유지 의무.
+- 키보드 focus visible 보강 (focus ring brand-primary 1px).
+
+**tokens.js Figma 동기화**:
+- 본 시점 Figma plugin `tokens.js` 부재 (Phase 22 시점). 향후 plugin 생성 시 `--color-action-hero` 동기화 의무.
+
+**제거 조건**:
+- hero CTA가 brand-primary로 회귀 결정되면 본 토큰 + 본 §6 같이 제거.
+- Phase 23+에서 surface별 contrast 자동 매핑 토큰 시스템 도입 시 통합 검토.

@@ -10,20 +10,20 @@ const NAV_LINKS = [
 
 function Navbar() {
   return (
-    <nav className="mx-auto flex min-h-[52px] w-full max-w-7xl flex-wrap items-center justify-between border-b border-[#d2d2d7] bg-white/90 px-5 py-2 backdrop-blur-xl sm:px-8">
+    <nav className="mx-auto flex min-h-[52px] w-full max-w-7xl flex-wrap items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-base)]/90 px-[var(--spacing-20)] py-[var(--spacing-8)] backdrop-blur-xl sm:px-[var(--spacing-32)]">
       <Link
         href="/"
-        className="font-pretendard text-[15px] font-semibold tracking-[-0.18px] text-[#1d1d1f]"
+        className="font-pretendard text-base font-semibold text-[var(--color-text-heading)]"
       >
         TruthScope
       </Link>
 
-      <ul className="order-3 mt-2 flex w-full items-center justify-center gap-5 border-t border-[#ededf0] pt-2 md:order-none md:mt-0 md:w-auto md:gap-7 md:border-t-0 md:pt-0">
+      <ul className="order-3 mt-[var(--spacing-8)] flex w-full items-center justify-center gap-[var(--spacing-20)] border-t border-[var(--color-border-subtle)] pt-[var(--spacing-8)] md:order-none md:mt-0 md:w-auto md:gap-[var(--spacing-24)] md:border-t-0 md:pt-0">
         {NAV_LINKS.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="font-pretendard text-[13px] tracking-[-0.08px] text-[#424245] transition-colors hover:text-[#0066cc]"
+              className="font-pretendard text-sm text-[var(--color-text-primary)] transition-colors hover:text-[var(--color-brand-secondary)]"
             >
               {link.label}
             </Link>
@@ -31,16 +31,16 @@ function Navbar() {
         ))}
       </ul>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-[var(--spacing-10)]">
         <button
-          className="hidden font-pretendard text-[13px] tracking-[-0.08px] text-[#424245] transition-colors hover:text-[#0066cc] md:inline-flex"
+          className="hidden font-pretendard text-sm text-[var(--color-text-primary)] transition-colors hover:text-[var(--color-brand-secondary)] md:inline-flex"
           type="button"
         >
           로그인
         </button>
         <Link
           href="/analysis/new"
-          className="inline-flex h-8 items-center rounded-full bg-[#0071e3] px-4 font-pretendard text-[13px] font-medium tracking-[-0.08px] text-white transition-colors hover:bg-[#0077ed]"
+          className="inline-flex h-8 items-center rounded-full bg-[var(--color-brand-primary)] px-[var(--spacing-16)] font-pretendard text-sm font-medium text-[var(--color-text-on-brand)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)]"
         >
           분석하기
         </Link>

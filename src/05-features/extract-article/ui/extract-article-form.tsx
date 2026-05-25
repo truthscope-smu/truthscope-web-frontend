@@ -61,16 +61,16 @@ export function ExtractArticleForm() {
   return (
     <form className="mt-[var(--spacing-24)]" onSubmit={handleSubmit}>
       <label
-        className="block text-sm tracking-[-0.224px] text-[var(--analysis-muted)]"
+        className="block text-sm text-[var(--color-text-secondary)]"
         htmlFor="analysis-url"
       >
         분석할 기사 URL
       </label>
-      <div className="mt-[var(--spacing-10)] flex min-h-12 items-center rounded-[12px] border border-[#86868b] bg-[var(--analysis-pearl)] px-[var(--spacing-16)]">
+      <div className="mt-[var(--spacing-10)] flex min-h-12 items-center rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface-base)] px-[var(--spacing-16)]">
         <input
           aria-describedby={error ? 'analysis-url-error' : undefined}
           aria-invalid={Boolean(error)}
-          className="min-w-0 flex-1 bg-transparent text-base tracking-[-0.374px] text-[var(--analysis-ink)] outline-none placeholder:text-[var(--analysis-muted)] disabled:cursor-not-allowed"
+          className="min-w-0 flex-1 bg-transparent text-base text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-secondary)] disabled:cursor-not-allowed"
           disabled={pending}
           id="analysis-url"
           onChange={(e) => {
@@ -85,13 +85,13 @@ export function ExtractArticleForm() {
         />
       </div>
       <button
-        className="mt-[14px] inline-flex h-10 w-full items-center justify-center rounded-full bg-[var(--analysis-blue)] px-[22px] text-[15px] font-medium tracking-[-0.12px] text-white transition-colors hover:bg-[#0077ed] disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-[var(--spacing-16)] inline-flex h-10 w-full items-center justify-center rounded-full bg-[var(--color-action-hero)] px-[var(--spacing-20)] text-base font-medium text-[var(--color-text-on-brand)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-primary)] disabled:cursor-not-allowed disabled:opacity-60"
         disabled={pending}
         type="submit"
       >
         {pending ? '분석 중' : '분석 시작'}
       </button>
-      <p className="mt-[14px] text-xs leading-5 tracking-[-0.12px] text-[var(--analysis-muted)]">
+      <p className="mt-[var(--spacing-16)] text-xs leading-5 text-[var(--color-text-secondary)]">
         분석 결과는 참고용이며, 최종 판단을 대체하지 않습니다.
       </p>
       {error && (
