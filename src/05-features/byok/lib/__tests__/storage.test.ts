@@ -245,6 +245,9 @@ describe('storage.ts', () => {
       // 복원
       if (originalStorage) {
         Object.defineProperty(navigator, 'storage', originalStorage);
+      } else {
+        // originalStorage 없던 환경 — mock 값 delete
+        delete (navigator as { storage?: unknown }).storage;
       }
     });
 
@@ -265,6 +268,9 @@ describe('storage.ts', () => {
       // 복원
       if (originalStorage) {
         Object.defineProperty(navigator, 'storage', originalStorage);
+      } else {
+        // originalStorage 없던 환경 — mock 값 delete
+        delete (navigator as { storage?: unknown }).storage;
       }
     });
   });

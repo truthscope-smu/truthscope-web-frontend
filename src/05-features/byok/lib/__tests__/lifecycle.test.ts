@@ -4,8 +4,8 @@ import 'fake-indexeddb/auto';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { saveKey, unwrapKey, lockAll, deleteKey } from '@/05-features/byok/lib';
 
-// 테스트용 유효한 Google AI API key (AIza + 35자 = 39자 총)
-const VALID_GOOGLE_KEY = 'AIzaSyTestKeyForLifecycle12345678901234';
+// 테스트용 키 (저엔트로피 반복 패턴 — 시크릿 스캐너 엔트로피 검사 통과 안 됨, 실제 key 아님)
+const TEST_ONLY_KEY = 'AIzaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 const VALID_PASSPHRASE = 'test-lifecycle-pass';
 
 // 테스트 인자 구성 헬퍼
@@ -16,7 +16,7 @@ function makeSaveArgs(overrides: Partial<Parameters<typeof saveKey>[0]> = {}) {
     providerId: 'generativelanguage.googleapis.com',
     keyName: 'lifecycle-key',
     plaintextKey: new TextEncoder().encode(
-      VALID_GOOGLE_KEY
+      TEST_ONLY_KEY
     ) as Uint8Array<ArrayBuffer>,
     passphrase: VALID_PASSPHRASE,
     ...overrides,
@@ -27,8 +27,11 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
   // 각 테스트 전 fake-indexeddb 새 인스턴스로 교체 (테스트 격리)
   beforeEach(async () => {
     const { IDBFactory } = await import('fake-indexeddb');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (globalThis as any).indexedDB = new IDBFactory();
+    Object.defineProperty(globalThis, 'indexedDB', {
+      value: new IDBFactory(),
+      configurable: true,
+      writable: true,
+    });
   });
 
   // ──────────────────────────────────────────────────────────
@@ -73,6 +76,7 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
 
       lockAll();
       // dek1은 zero-fill됨
+      expect(Array.from(dek1).every((b) => b === 0)).toBe(true);
 
       // lockAll 후 재호출 — record는 IndexedDB에 남아 있어 재복호화 가능
       const dek2 = await unwrapKey({
@@ -86,8 +90,6 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       expect(dek2.length).toBe(32);
       // dek2는 zero-fill 전 상태여야 함
       expect(Array.from(dek2).some((b) => b !== 0)).toBe(true);
-
-      void dek1; // 사용 선언 (linter 경고 방지)
     });
   });
 
