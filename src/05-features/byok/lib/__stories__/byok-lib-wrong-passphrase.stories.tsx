@@ -88,34 +88,45 @@ function WrongPassphraseForm() {
   };
 
   const seedStatusColor =
-    status === 'seeded' ? '#2e7d32' : status === 'idle' ? '#888' : '#0d47a1';
+    status === 'seeded'
+      ? 'var(--color-success-strong)'
+      : status === 'idle'
+        ? 'var(--color-text-secondary)'
+        : 'var(--color-brand-secondary)';
 
   return (
     <div
       style={{
         fontFamily: 'Pretendard, sans-serif',
         maxWidth: 480,
-        padding: 24,
-        border: '1px solid #e0e0e0',
+        padding: 'var(--spacing-24)',
+        border: '1px solid var(--color-border-subtle)',
         borderRadius: 8,
       }}
     >
-      <h2 style={{ marginTop: 0, color: '#0f2d52' }}>
+      <h2 style={{ marginTop: 0, color: 'var(--color-brand-primary)' }}>
         BYOK Lib — Wrong Passphrase
       </h2>
-      <p style={{ color: '#444', fontSize: 14 }}>
+      <p
+        style={{
+          color: 'var(--color-text-secondary)',
+          fontSize: 'var(--font-body-sm-size)',
+        }}
+      >
         사전 저장된 record에 잘못된 passphrase로 복호화를 시도합니다.
         <br />
         AES-GCM auth tag 검증 실패 시 <strong>PassphraseIncorrectError</strong>
         를 표시합니다.
+        <br />
+        AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.
       </p>
 
       <div
         style={{
-          padding: 10,
+          padding: 'var(--spacing-10)',
           borderRadius: 4,
-          background: '#f5f5f5',
-          marginBottom: 16,
+          background: 'var(--color-bg-surface-sunken)',
+          marginBottom: 'var(--spacing-16)',
           fontSize: 13,
           color: seedStatusColor,
         }}
@@ -124,7 +135,13 @@ function WrongPassphraseForm() {
       </div>
 
       <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>
+        <label
+          style={{
+            display: 'block',
+            marginBottom: 4,
+            fontSize: 'var(--font-body-sm-size)',
+          }}
+        >
           잘못된 Passphrase 입력
         </label>
         <input
@@ -135,9 +152,9 @@ function WrongPassphraseForm() {
           placeholder="잘못된 passphrase를 입력하세요"
           style={{
             width: '100%',
-            padding: 8,
+            padding: 'var(--spacing-8)',
             borderRadius: 4,
-            border: '1px solid #ccc',
+            border: '1px solid var(--color-border-subtle)',
             boxSizing: 'border-box',
           }}
         />
@@ -148,9 +165,12 @@ function WrongPassphraseForm() {
         onClick={() => void handleTryUnlock()}
         disabled={status === 'loading' || status === 'idle'}
         style={{
-          padding: '8px 16px',
-          background: status === 'loading' ? '#999' : '#c62828',
-          color: 'white',
+          padding: 'var(--spacing-8) var(--spacing-16)',
+          background:
+            status === 'loading'
+              ? 'var(--color-text-secondary)'
+              : 'var(--color-error)',
+          color: 'var(--color-text-on-error)',
           border: 'none',
           borderRadius: 4,
           cursor:
@@ -166,11 +186,11 @@ function WrongPassphraseForm() {
         <div
           className="error-message"
           style={{
-            marginTop: 16,
-            padding: 12,
+            marginTop: 'var(--spacing-16)',
+            padding: 'var(--spacing-10)',
             borderRadius: 4,
-            background: '#fff0f0',
-            color: '#c62828',
+            background: 'var(--color-error-subtle)',
+            color: 'var(--color-error)',
             fontSize: 13,
             fontFamily: 'monospace',
           }}
@@ -185,9 +205,9 @@ function WrongPassphraseForm() {
             marginTop: 16,
             padding: 12,
             borderRadius: 4,
-            background: '#f0fff4',
-            color: '#2e7d32',
-            fontSize: 14,
+            background: 'var(--color-success-subtle)',
+            color: 'var(--color-success-strong)',
+            fontSize: 'var(--font-body-sm-size)',
           }}
         >
           {message}

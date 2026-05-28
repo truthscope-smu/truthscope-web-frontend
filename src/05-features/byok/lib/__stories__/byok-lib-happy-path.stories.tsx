@@ -11,6 +11,7 @@ import {
   isAvailable,
 } from '@/05-features/byok/lib';
 import type { ApiProvider } from '@/05-features/byok/lib/types';
+import { AppError } from '@/07-shared/errors';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Storybook 시나리오 1: Happy path
@@ -34,7 +35,7 @@ function HappyPathForm() {
     try {
       const available = await isAvailable();
       if (!available) {
-        throw new Error('IndexedDB를 사용할 수 없는 환경입니다');
+        throw new AppError('IndexedDB를 사용할 수 없는 환경입니다');
       }
       await saveKey({
         userId: 'storybook-user-1',
@@ -96,21 +97,36 @@ function HappyPathForm() {
       style={{
         fontFamily: 'Pretendard, sans-serif',
         maxWidth: 480,
-        padding: 24,
-        border: '1px solid #e0e0e0',
+        padding: 'var(--spacing-24)',
+        border: '1px solid var(--color-border-subtle)',
         borderRadius: 8,
       }}
     >
-      <h2 style={{ marginTop: 0, color: '#0f2d52' }}>BYOK Lib — Happy Path</h2>
-      <p style={{ color: '#444', fontSize: 14 }}>
+      <h2 style={{ marginTop: 0, color: 'var(--color-brand-primary)' }}>
+        BYOK Lib — Happy Path
+      </h2>
+      <p
+        style={{
+          color: 'var(--color-text-secondary)',
+          fontSize: 'var(--font-body-sm-size)',
+        }}
+      >
         API key를 passphrase로 암호화하여 IndexedDB에 저장합니다.
         <br />
         <strong>passphrase 분실 시 복구 불가</strong> — 삭제 후 재등록만
         가능합니다.
+        <br />
+        AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.
       </p>
 
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>
+      <div style={{ marginBottom: 'var(--spacing-16)' }}>
+        <label
+          style={{
+            display: 'block',
+            marginBottom: 4,
+            fontSize: 'var(--font-body-sm-size)',
+          }}
+        >
           Provider
         </label>
         <select
@@ -119,9 +135,9 @@ function HappyPathForm() {
           onChange={(e) => setProvider(e.target.value as ApiProvider)}
           style={{
             width: '100%',
-            padding: 8,
+            padding: 'var(--spacing-8)',
             borderRadius: 4,
-            border: '1px solid #ccc',
+            border: '1px solid var(--color-border-subtle)',
           }}
         >
           <option value="google-ai">google-ai</option>
@@ -130,8 +146,14 @@ function HappyPathForm() {
         </select>
       </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>
+      <div style={{ marginBottom: 'var(--spacing-16)' }}>
+        <label
+          style={{
+            display: 'block',
+            marginBottom: 4,
+            fontSize: 'var(--font-body-sm-size)',
+          }}
+        >
           Passphrase (8~128자)
         </label>
         <input
@@ -142,16 +164,22 @@ function HappyPathForm() {
           placeholder="최소 8자 이상"
           style={{
             width: '100%',
-            padding: 8,
+            padding: 'var(--spacing-8)',
             borderRadius: 4,
-            border: '1px solid #ccc',
+            border: '1px solid var(--color-border-subtle)',
             boxSizing: 'border-box',
           }}
         />
       </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>
+      <div style={{ marginBottom: 'var(--spacing-16)' }}>
+        <label
+          style={{
+            display: 'block',
+            marginBottom: 4,
+            fontSize: 'var(--font-body-sm-size)',
+          }}
+        >
           API Key
         </label>
         <input
@@ -166,23 +194,25 @@ function HappyPathForm() {
           }
           style={{
             width: '100%',
-            padding: 8,
+            padding: 'var(--spacing-8)',
             borderRadius: 4,
-            border: '1px solid #ccc',
+            border: '1px solid var(--color-border-subtle)',
             boxSizing: 'border-box',
           }}
         />
       </div>
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div
+        style={{ display: 'flex', gap: 'var(--spacing-8)', flexWrap: 'wrap' }}
+      >
         <button
           type="button"
           onClick={() => void handleSave()}
           disabled={status === 'loading'}
           style={{
-            padding: '8px 16px',
-            background: '#0f2d52',
-            color: 'white',
+            padding: 'var(--spacing-8) var(--spacing-16)',
+            background: 'var(--color-brand-primary)',
+            color: 'var(--color-text-on-brand)',
             border: 'none',
             borderRadius: 4,
             cursor: status === 'loading' ? 'not-allowed' : 'pointer',
@@ -195,9 +225,9 @@ function HappyPathForm() {
           onClick={() => void handleDecrypt()}
           disabled={status === 'loading'}
           style={{
-            padding: '8px 16px',
-            background: '#285c9f',
-            color: 'white',
+            padding: 'var(--spacing-8) var(--spacing-16)',
+            background: 'var(--color-brand-secondary)',
+            color: 'var(--color-text-on-brand)',
             border: 'none',
             borderRadius: 4,
             cursor: status === 'loading' ? 'not-allowed' : 'pointer',
@@ -209,9 +239,9 @@ function HappyPathForm() {
           type="button"
           onClick={handleLockAll}
           style={{
-            padding: '8px 16px',
-            background: '#444',
-            color: 'white',
+            padding: 'var(--spacing-8) var(--spacing-16)',
+            background: 'var(--color-text-secondary)',
+            color: 'var(--color-text-on-brand)',
             border: 'none',
             borderRadius: 4,
             cursor: 'pointer',
@@ -225,12 +255,18 @@ function HappyPathForm() {
         <div
           className={status === 'error' ? 'error-message' : 'success-message'}
           style={{
-            marginTop: 16,
-            padding: 12,
+            marginTop: 'var(--spacing-16)',
+            padding: 'var(--spacing-10)',
             borderRadius: 4,
-            background: status === 'error' ? '#fff0f0' : '#f0fff4',
-            color: status === 'error' ? '#c62828' : '#2e7d32',
-            fontSize: 14,
+            background:
+              status === 'error'
+                ? 'var(--color-error-subtle)'
+                : 'var(--color-success-subtle)',
+            color:
+              status === 'error'
+                ? 'var(--color-error)'
+                : 'var(--color-success-strong)',
+            fontSize: 'var(--font-body-sm-size)',
           }}
         >
           {message}
@@ -240,11 +276,11 @@ function HappyPathForm() {
       {decryptedPreview && status === 'decrypted' && (
         <div
           style={{
-            marginTop: 8,
-            padding: 12,
+            marginTop: 'var(--spacing-8)',
+            padding: 'var(--spacing-10)',
             borderRadius: 4,
-            background: '#e3f2fd',
-            color: '#0d47a1',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-brand-primary)',
             fontSize: 13,
             fontFamily: 'monospace',
           }}

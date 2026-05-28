@@ -77,11 +77,11 @@ function IndexedDBUnsupportedForm() {
   };
 
   const statusColor = {
-    idle: '#888',
-    checking: '#0d47a1',
-    available: '#2e7d32',
-    unavailable: '#c62828',
-    error: '#c62828',
+    idle: 'var(--color-text-secondary)',
+    checking: 'var(--color-brand-secondary)',
+    available: 'var(--color-success-strong)',
+    unavailable: 'var(--color-error)',
+    error: 'var(--color-error)',
   }[status];
 
   return (
@@ -89,15 +89,20 @@ function IndexedDBUnsupportedForm() {
       style={{
         fontFamily: 'Pretendard, sans-serif',
         maxWidth: 480,
-        padding: 24,
-        border: '1px solid #e0e0e0',
+        padding: 'var(--spacing-24)',
+        border: '1px solid var(--color-border-subtle)',
         borderRadius: 8,
       }}
     >
-      <h2 style={{ marginTop: 0, color: '#0f2d52' }}>
+      <h2 style={{ marginTop: 0, color: 'var(--color-brand-primary)' }}>
         BYOK Lib — IndexedDB Unsupported
       </h2>
-      <p style={{ color: '#444', fontSize: 14 }}>
+      <p
+        style={{
+          color: 'var(--color-text-secondary)',
+          fontSize: 'var(--font-body-sm-size)',
+        }}
+      >
         IndexedDB가 미지원되는 환경(Safari Private 모드, 구형 브라우저)에서의
         에러 상태 표시.
         <br />
@@ -105,14 +110,16 @@ function IndexedDBUnsupportedForm() {
           IndexedDBNotSupportedError
         </strong>{' '}
         표시.
+        <br />
+        AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.
       </p>
 
       <div
         style={{
-          padding: 12,
+          padding: 'var(--spacing-10)',
           borderRadius: 4,
-          background: '#f5f5f5',
-          marginBottom: 16,
+          background: 'var(--color-bg-surface-sunken)',
+          marginBottom: 'var(--spacing-16)',
           fontSize: 13,
         }}
       >
@@ -130,9 +137,11 @@ function IndexedDBUnsupportedForm() {
         style={{
           padding: 12,
           borderRadius: 4,
+          /* amber-50: 디자인 토큰 미정의, Phase 23+ 토큰화 후보 */
           background: '#fff8e1',
-          marginBottom: 16,
+          marginBottom: 'var(--spacing-16)',
           fontSize: 13,
+          /* orange-800: 디자인 토큰 미정의, Phase 23+ 토큰화 후보 */
           color: '#e65100',
         }}
       >
@@ -145,9 +154,11 @@ function IndexedDBUnsupportedForm() {
         onClick={() => void handleSimulateUnsupported()}
         disabled={isSimulating || status === 'checking'}
         style={{
-          padding: '8px 16px',
-          background: isSimulating ? '#999' : '#c62828',
-          color: 'white',
+          padding: 'var(--spacing-8) var(--spacing-16)',
+          background: isSimulating
+            ? 'var(--color-text-secondary)'
+            : 'var(--color-error)',
+          color: 'var(--color-text-on-error)',
           border: 'none',
           borderRadius: 4,
           cursor:
@@ -161,11 +172,11 @@ function IndexedDBUnsupportedForm() {
         <div
           className="error-message"
           style={{
-            marginTop: 16,
+            marginTop: 'var(--spacing-16)',
             padding: 12,
             borderRadius: 4,
-            background: '#fff0f0',
-            color: '#c62828',
+            background: 'var(--color-error-subtle)',
+            color: 'var(--color-error)',
             fontSize: 13,
             fontFamily: 'monospace',
           }}
@@ -180,9 +191,9 @@ function IndexedDBUnsupportedForm() {
             marginTop: 16,
             padding: 12,
             borderRadius: 4,
-            background: '#f0fff4',
-            color: '#2e7d32',
-            fontSize: 14,
+            background: 'var(--color-success-subtle)',
+            color: 'var(--color-success-strong)',
+            fontSize: 'var(--font-body-sm-size)',
           }}
         >
           {message}
@@ -194,8 +205,10 @@ function IndexedDBUnsupportedForm() {
           marginTop: 16,
           padding: 12,
           borderRadius: 4,
+          /* indigo-50: 디자인 토큰 미정의, Phase 23+ 토큰화 후보 */
           background: '#e8eaf6',
-          fontSize: 12,
+          fontSize: 'var(--font-label-size)',
+          /* indigo-600: 디자인 토큰 미정의, Phase 23+ 토큰화 후보 */
           color: '#3949ab',
         }}
       >
