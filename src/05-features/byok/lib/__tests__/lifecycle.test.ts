@@ -35,39 +35,42 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
   });
 
   // ──────────────────────────────────────────────────────────
-  // happy path: saveKey → unwrapKey → lockAll
+  // happy path: saveKey → unwrapKey → lockAll (V2 round-trip 검증)
   // ──────────────────────────────────────────────────────────
   describe('happy path: saveKey → unwrapKey → lockAll', () => {
-    it('saveKey 저장 → unwrapKey 복호화 → lockAll zero-fill', async () => {
-      // saveKey
+    it('saveKey 저장 → unwrapKey 복호화 → 실제 plaintextKey 복원 → lockAll zero-fill', async () => {
+      // saveKey (V2: plaintextKey 직접 AES-GCM encrypt)
       await saveKey(makeSaveArgs());
 
-      // unwrapKey — rawDEK 반환 확인
-      const rawDEK = await unwrapKey({
+      // unwrapKey — plaintextKey raw bytes 반환 확인 (V2 round-trip)
+      const plaintextKey = await unwrapKey({
         userId: 'lifecycle-user-1',
         provider: 'google-ai',
         keyName: 'lifecycle-key',
         passphrase: VALID_PASSPHRASE,
       });
 
-      expect(rawDEK).toBeInstanceOf(Uint8Array);
-      expect(rawDEK.length).toBe(32);
+      expect(plaintextKey).toBeInstanceOf(Uint8Array);
 
-      // lockAll 전: rawDEK에 값이 있어야 함
-      const beforeLock = Array.from(rawDEK).some((b) => b !== 0);
+      // V2 round-trip 핵심 검증: 복호화된 bytes가 원본 TEST_ONLY_KEY와 동일해야 함
+      const decoded = new TextDecoder().decode(plaintextKey);
+      expect(decoded).toBe(TEST_ONLY_KEY);
+
+      // lockAll 전: plaintextKey에 값이 있어야 함
+      const beforeLock = Array.from(plaintextKey).some((b) => b !== 0);
       expect(beforeLock).toBe(true);
 
-      // lockAll 호출 — inMemoryDeks zero-fill
+      // lockAll 호출 — inMemoryPlaintextKeys zero-fill
       lockAll();
 
-      // lockAll 후: rawDEK가 zero-fill되었는지 확인 (같은 참조)
-      const afterLock = Array.from(rawDEK).every((b) => b === 0);
+      // lockAll 후: plaintextKey가 zero-fill되었는지 확인 (같은 참조)
+      const afterLock = Array.from(plaintextKey).every((b) => b === 0);
       expect(afterLock).toBe(true);
     });
 
-    it('lockAll 후 unwrapKey 재호출 → 새 rawDEK 반환 (record는 유지)', async () => {
+    it('lockAll 후 unwrapKey 재호출 → 새 plaintextKey 반환 (record는 유지)', async () => {
       await saveKey(makeSaveArgs());
-      const dek1 = await unwrapKey({
+      const key1 = await unwrapKey({
         userId: 'lifecycle-user-1',
         provider: 'google-ai',
         keyName: 'lifecycle-key',
@@ -75,41 +78,42 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       });
 
       lockAll();
-      // dek1은 zero-fill됨
-      expect(Array.from(dek1).every((b) => b === 0)).toBe(true);
+      // key1은 zero-fill됨
+      expect(Array.from(key1).every((b) => b === 0)).toBe(true);
 
       // lockAll 후 재호출 — record는 IndexedDB에 남아 있어 재복호화 가능
-      const dek2 = await unwrapKey({
+      const key2 = await unwrapKey({
         userId: 'lifecycle-user-1',
         provider: 'google-ai',
         keyName: 'lifecycle-key',
         passphrase: VALID_PASSPHRASE,
       });
 
-      expect(dek2).toBeInstanceOf(Uint8Array);
-      expect(dek2.length).toBe(32);
-      // dek2는 zero-fill 전 상태여야 함
-      expect(Array.from(dek2).some((b) => b !== 0)).toBe(true);
+      expect(key2).toBeInstanceOf(Uint8Array);
+      // key2도 TEST_ONLY_KEY와 동일 (V2 round-trip 재확인)
+      expect(new TextDecoder().decode(key2)).toBe(TEST_ONLY_KEY);
+      // key2는 zero-fill 전 상태여야 함
+      expect(Array.from(key2).some((b) => b !== 0)).toBe(true);
     });
   });
 
   // ──────────────────────────────────────────────────────────
-  // lockAll 여러 DEK 동시 zero-fill
+  // lockAll 여러 plaintextKey 동시 zero-fill
   // ──────────────────────────────────────────────────────────
-  describe('lockAll 여러 DEK 동시 zero-fill', () => {
+  describe('lockAll 여러 plaintextKey 동시 zero-fill', () => {
     it('여러 key unwrapKey 후 lockAll → 모두 zero-fill', async () => {
       // key-a 저장
       await saveKey(makeSaveArgs({ keyName: 'key-a' }));
       // key-b 저장
       await saveKey(makeSaveArgs({ keyName: 'key-b' }));
 
-      const dekA = await unwrapKey({
+      const keyA = await unwrapKey({
         userId: 'lifecycle-user-1',
         provider: 'google-ai',
         keyName: 'key-a',
         passphrase: VALID_PASSPHRASE,
       });
-      const dekB = await unwrapKey({
+      const keyB = await unwrapKey({
         userId: 'lifecycle-user-1',
         provider: 'google-ai',
         keyName: 'key-b',
@@ -118,8 +122,8 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
 
       lockAll();
 
-      expect(Array.from(dekA).every((b) => b === 0)).toBe(true);
-      expect(Array.from(dekB).every((b) => b === 0)).toBe(true);
+      expect(Array.from(keyA).every((b) => b === 0)).toBe(true);
+      expect(Array.from(keyB).every((b) => b === 0)).toBe(true);
     });
   });
 
@@ -127,9 +131,9 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
   // beforeunload 이벤트 → lockAll 자동 호출
   // ──────────────────────────────────────────────────────────
   describe('beforeunload 이벤트 → lockAll 자동 호출', () => {
-    it('beforeunload dispatch 시 lockAll이 호출되어 DEK zero-fill', async () => {
+    it('beforeunload dispatch 시 lockAll이 호출되어 plaintextKey zero-fill', async () => {
       await saveKey(makeSaveArgs());
-      const rawDEK = await unwrapKey({
+      const plaintextKey = await unwrapKey({
         userId: 'lifecycle-user-1',
         provider: 'google-ai',
         keyName: 'lifecycle-key',
@@ -146,8 +150,8 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       // spy가 호출됐는지 확인
       expect(lockAllSpy).toHaveBeenCalledOnce();
 
-      // index.ts의 실제 beforeunload 핸들러도 실행됐으므로 rawDEK zero-fill 확인
-      expect(Array.from(rawDEK).every((b) => b === 0)).toBe(true);
+      // index.ts의 실제 beforeunload 핸들러도 실행됐으므로 plaintextKey zero-fill 확인
+      expect(Array.from(plaintextKey).every((b) => b === 0)).toBe(true);
 
       window.removeEventListener('beforeunload', lockAllSpy);
     });
@@ -157,7 +161,7 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
   // deleteKey 후 unwrapKey → KeyNotFoundError (record 삭제 후 재등록만 가능)
   // ──────────────────────────────────────────────────────────
   describe('deleteKey + 재등록 flow', () => {
-    it('deleteKey 후 saveKey 재등록 → 새 DEK로 unwrapKey 가능', async () => {
+    it('deleteKey 후 saveKey 재등록 → 새 plaintextKey로 unwrapKey 가능', async () => {
       const { KeyNotFoundError } = await import('@/05-features/byok/lib');
 
       await saveKey(makeSaveArgs());
@@ -178,16 +182,17 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       // 재등록
       await saveKey(makeSaveArgs());
 
-      // 재등록 후 unwrapKey → 성공
-      const newDEK = await unwrapKey({
+      // 재등록 후 unwrapKey → 성공 + round-trip 확인
+      const newKey = await unwrapKey({
         userId: 'lifecycle-user-1',
         provider: 'google-ai',
         keyName: 'lifecycle-key',
         passphrase: VALID_PASSPHRASE,
       });
 
-      expect(newDEK).toBeInstanceOf(Uint8Array);
-      expect(newDEK.length).toBe(32);
+      expect(newKey).toBeInstanceOf(Uint8Array);
+      // V2 round-trip: 복호화 결과 = 원본 TEST_ONLY_KEY
+      expect(new TextDecoder().decode(newKey)).toBe(TEST_ONLY_KEY);
     });
   });
 });

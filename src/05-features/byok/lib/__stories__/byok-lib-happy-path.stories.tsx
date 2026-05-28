@@ -64,23 +64,21 @@ function HappyPathForm() {
     setStatus('loading');
     setMessage('');
     try {
-      const rawDEK = await unwrapKey({
+      const plaintextKey = await unwrapKey({
         userId: 'storybook-user-1',
         provider,
         keyName: 'storybook-test-key',
         passphrase,
       });
-      // raw bytes를 base64로 미리보기 (실제 사용 시에는 즉시 zero-fill 필요)
-      const preview = btoa(
-        Array.from(rawDEK)
-          .map((b) => String.fromCharCode(b))
-          .join('')
-      ).slice(0, 20);
-      setDecryptedPreview(`DEK (base64 첫 20자): ${preview}...`);
+      // plaintextKey를 TextDecoder로 디코딩 (V2: 실제 API 키 복원 가능)
+      const decoded = new TextDecoder().decode(plaintextKey);
+      setDecryptedPreview(`복호화된 키: ${decoded}`);
       // caller zero-fill 의무 시뮬레이션 (ADR-004 §c)
-      rawDEK.fill(0);
+      plaintextKey.fill(0);
       setStatus('decrypted');
-      setMessage('복호화 성공 — DEK raw bytes 반환 후 즉시 zero-fill 완료');
+      setMessage(
+        '복호화 성공 — plaintextKey raw bytes 반환 후 즉시 zero-fill 완료'
+      );
     } catch (e) {
       setStatus('error');
       setMessage(`오류: ${e instanceof Error ? e.message : String(e)}`);
@@ -300,7 +298,8 @@ const meta = {
     docs: {
       description: {
         story:
-          'BYOK lib Scenario 1 — saveKey + unwrapKey + lockAll happy path. ' +
+          'BYOK lib Scenario 1 — saveKey + unwrapKey + lockAll happy path (V2 schema). ' +
+          'Web Crypto AES-GCM + PBKDF2 + non-extractable CryptoKey + encrypted IndexedDB storage. ' +
           'passphrase 분실 시 record 삭제 후 재등록만 가능 (복구 불가, Precondition 1).',
       },
     },

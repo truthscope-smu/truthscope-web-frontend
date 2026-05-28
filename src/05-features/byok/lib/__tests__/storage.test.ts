@@ -14,21 +14,24 @@ import {
 import {
   KeyAlreadyExistsError,
   KeyNotFoundError,
-  type StoredApiKeyRecordV1,
+  type StoredApiKeyRecord,
 } from '@/05-features/byok/lib/types';
 
-// 테스트용 샘플 record 생성 헬퍼
+// 테스트용 샘플 V2 record 생성 헬퍼
 const sampleRecord = (
-  overrides: Partial<StoredApiKeyRecordV1> = {}
-): StoredApiKeyRecordV1 => ({
-  version: 1,
+  overrides: Partial<StoredApiKeyRecord> = {}
+): StoredApiKeyRecord => ({
+  version: 2,
   userId: 'user-1',
   provider: 'google-ai',
   providerId: 'generativelanguage.googleapis.com',
   keyName: 'default',
-  wrappedDekIv: 'aWl2aWl2aWl2', // base64url 12 byte 샘플
-  wrappedDekCiphertext: 'Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4',
-  salt: 'c2x0c2x0c2x0c2x0', // base64url 16 byte 샘플
+  // base64url 샘플: AES-GCM ciphertext (plaintextKey 암호화 결과)
+  ciphertext: 'Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4Y3R4',
+  // base64url 12 byte IV 샘플
+  iv: 'aWl2aWl2aWl2',
+  // base64url 16 byte salt 샘플
+  salt: 'c2x0c2x0c2x0c2x0',
   kdf: 'PBKDF2-SHA-256',
   iterations: 600_000,
   keyFingerprint: 'a1b2c3d4e5f60718',
@@ -88,7 +91,8 @@ describe('storage.ts', () => {
       expect(retrieved.provider).toBe(record.provider);
       expect(retrieved.keyName).toBe(record.keyName);
       expect(retrieved.keyFingerprint).toBe(record.keyFingerprint);
-      expect(retrieved.wrappedDekIv).toBe(record.wrappedDekIv);
+      expect(retrieved.iv).toBe(record.iv);
+      expect(retrieved.ciphertext).toBe(record.ciphertext);
     });
 
     it('pk 필드가 반환 결과에 포함되지 않음', async () => {

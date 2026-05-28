@@ -1,10 +1,11 @@
 /**
- * BYOK lib — Web Crypto AES-GCM + PBKDF2 + envelope encryption.
+ * BYOK lib — Web Crypto AES-GCM + PBKDF2 + non-extractable CryptoKey + encrypted IndexedDB storage.
  *
- * ADR-004 (b)(c) 정합. KEK = PBKDF2(passphrase, salt, 600k). DEK = random 32 byte raw bytes.
- * KEK usage = ['encrypt','decrypt'] (Round 1 F1 amend: wrapKey API 미사용).
+ * ADR-004 (b)(c) 정합.
+ * KEK = PBKDF2(passphrase, salt, 600k, AES-GCM, extractable:false, ['encrypt','decrypt']).
+ * plaintextKey를 KEK로 직접 AES-GCM encrypt (V1 DEK/KEK envelope 구조 폐기 — 옵션 B).
  *
- * caller zero-fill 의무: unwrapDEK 반환 raw bytes는 BE 헤더 1회성 조립 후 즉시 zeroFill 호출 (ADR-004 §c).
+ * caller zero-fill 의무: decryptApiKey 반환 raw bytes는 BE 헤더 1회성 조립 후 즉시 zeroFill 호출 (ADR-004 §c).
  */
 
 import { PassphraseIncorrectError } from '@/05-features/byok/lib/types';
@@ -13,9 +14,13 @@ export const PBKDF2_ITERATIONS = 600_000;
 export const PBKDF2_HASH = 'SHA-256' as const;
 export const SALT_LENGTH_BYTES = 16;
 export const IV_LENGTH_BYTES = 12;
-export const DEK_LENGTH_BYTES = 32;
 export const FINGERPRINT_HEX_LENGTH = 16;
 
+/**
+ * PBKDF2-SHA-256 600k 반복으로 passphrase + salt에서 KEK 유도.
+ * extractable:false — CryptoKey가 JS 메모리 외부로 노출되지 않음.
+ * usages: ['encrypt','decrypt'] — AES-GCM 직접 암복호화용.
+ */
 export async function deriveKEK(
   passphrase: string,
   salt: Uint8Array<ArrayBuffer>
@@ -42,21 +47,33 @@ export async function deriveKEK(
   );
 }
 
-export async function wrapDEK(
+/**
+ * AES-GCM으로 plaintextKey를 KEK로 직접 암호화.
+ * IV는 매 호출마다 random 12 byte 생성 (IV uniqueness 보장).
+ *
+ * V1 DEK/KEK envelope 구조 폐기 — codex 5.5 thread `019e6ded` 옵션 B 채택.
+ */
+export async function encryptApiKey(
   kek: CryptoKey,
-  rawDEK: Uint8Array<ArrayBuffer>
+  plaintextKey: Uint8Array<ArrayBuffer>
 ): Promise<{ iv: Uint8Array<ArrayBuffer>; ciphertext: ArrayBuffer }> {
   const iv = new Uint8Array(new ArrayBuffer(IV_LENGTH_BYTES));
   crypto.getRandomValues(iv);
   const ciphertext = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv: iv as BufferSource },
     kek,
-    rawDEK as BufferSource
+    plaintextKey as BufferSource
   );
   return { iv, ciphertext };
 }
 
-export async function unwrapDEK(
+/**
+ * AES-GCM으로 ciphertext를 KEK로 복호화하여 plaintextKey raw bytes 반환.
+ * AES-GCM auth tag 검증 실패 시 PassphraseIncorrectError throw.
+ *
+ * caller zero-fill 의무: 반환 bytes는 BE 헤더 1회성 조립 후 즉시 zeroFill 호출 (ADR-004 §c).
+ */
+export async function decryptApiKey(
   kek: CryptoKey,
   iv: Uint8Array<ArrayBuffer>,
   ciphertext: Uint8Array<ArrayBuffer>
@@ -74,12 +91,6 @@ export async function unwrapDEK(
       'AES-GCM authentication failed — wrong passphrase or corrupted record'
     );
   }
-}
-
-export function generateDEK(): Uint8Array<ArrayBuffer> {
-  const dek = new Uint8Array(new ArrayBuffer(DEK_LENGTH_BYTES));
-  crypto.getRandomValues(dek);
-  return dek;
 }
 
 export async function computeFingerprint(

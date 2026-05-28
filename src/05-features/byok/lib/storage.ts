@@ -7,7 +7,7 @@
  */
 
 import type {
-  StoredApiKeyRecordV1,
+  StoredApiKeyRecord,
   ApiProvider,
 } from '@/05-features/byok/lib/types';
 import {
@@ -106,7 +106,7 @@ export async function requestPersistentStorage(): Promise<boolean> {
  * record 저장. 같은 primary key가 이미 존재하면 KeyAlreadyExistsError throw.
  * putRecord는 항상 새 record 등록용 — update는 별도 메서드로 분리 (ADR-004 §a 정합).
  */
-export async function putRecord(record: StoredApiKeyRecordV1): Promise<void> {
+export async function putRecord(record: StoredApiKeyRecord): Promise<void> {
   const available = await isAvailable();
   if (!available) {
     throw new IndexedDBNotSupportedError(
@@ -152,7 +152,7 @@ export async function getRecord(
   userId: string,
   provider: ApiProvider,
   keyName: string
-): Promise<StoredApiKeyRecordV1> {
+): Promise<StoredApiKeyRecord> {
   const available = await isAvailable();
   if (!available) {
     throw new IndexedDBNotSupportedError(
@@ -175,10 +175,10 @@ export async function getRecord(
       throw new KeyNotFoundError(`${pk} not found`);
     }
 
-    // pk 필드 제거 후 반환 (StoredApiKeyRecordV1 타입 준수)
-    const { pk: _pk, ...record } = raw as StoredApiKeyRecordV1 & { pk: string };
+    // pk 필드 제거 후 반환 (StoredApiKeyRecord 타입 준수)
+    const { pk: _pk, ...record } = raw as StoredApiKeyRecord & { pk: string };
     void _pk;
-    return record as StoredApiKeyRecordV1;
+    return record as StoredApiKeyRecord;
   } finally {
     db.close();
   }
@@ -190,7 +190,7 @@ export async function getRecord(
 export async function listRecords(
   userId: string,
   filter?: { provider?: ApiProvider }
-): Promise<StoredApiKeyRecordV1[]> {
+): Promise<StoredApiKeyRecord[]> {
   const available = await isAvailable();
   if (!available) {
     throw new IndexedDBNotSupportedError(
@@ -210,11 +210,11 @@ export async function listRecords(
     });
 
     const records = raws.map((raw) => {
-      const { pk: _pk, ...record } = raw as StoredApiKeyRecordV1 & {
+      const { pk: _pk, ...record } = raw as StoredApiKeyRecord & {
         pk: string;
       };
       void _pk;
-      return record as StoredApiKeyRecordV1;
+      return record as StoredApiKeyRecord;
     });
 
     // provider 필터 적용
@@ -277,7 +277,7 @@ export async function clearUserRecords(userId: string): Promise<void> {
       const index = store.index('byUserId');
       const req = index.getAll(userId);
       req.onsuccess = () => {
-        const items = (req.result ?? []) as (StoredApiKeyRecordV1 & {
+        const items = (req.result ?? []) as (StoredApiKeyRecord & {
           pk: string;
         })[];
         resolve(items.map((item) => item.pk));

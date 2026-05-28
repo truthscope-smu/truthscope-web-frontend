@@ -2,12 +2,13 @@
  * BYOK lib — public API.
  *
  * ADR-004 §(a)(b)(c)(f) 정합.
+ * 암호화 방식: Web Crypto AES-GCM + PBKDF2 + non-extractable CryptoKey + encrypted IndexedDB storage.
  * passphrase 분실 시 record 삭제 후 재등록만 가능 (복구 메커니즘 없음, Precondition 1).
  * caller zero-fill 의무: unwrapKey 반환 raw bytes는 BE 헤더 1회성 조립 후 즉시 zeroFill 호출 (ADR-004 §c).
  */
 
 import type {
-  StoredApiKeyRecordV1,
+  StoredApiKeyRecord,
   ApiProvider,
 } from '@/05-features/byok/lib/types';
 import {
@@ -16,12 +17,12 @@ import {
   KeyFormatError,
   KeyNotFoundError,
   KeyAlreadyExistsError,
+  NeedsKeyReentryError,
 } from '@/05-features/byok/lib/types';
 import {
   deriveKEK,
-  wrapDEK,
-  unwrapDEK,
-  generateDEK,
+  encryptApiKey,
+  decryptApiKey,
   computeFingerprint,
   zeroFill,
   toBase64Url,
@@ -30,7 +31,6 @@ import {
   PBKDF2_ITERATIONS,
   PBKDF2_HASH,
   IV_LENGTH_BYTES,
-  DEK_LENGTH_BYTES,
   FINGERPRINT_HEX_LENGTH,
 } from '@/05-features/byok/lib/crypto';
 import {
@@ -52,7 +52,6 @@ export {
   PBKDF2_HASH,
   SALT_LENGTH_BYTES,
   IV_LENGTH_BYTES,
-  DEK_LENGTH_BYTES,
   FINGERPRINT_HEX_LENGTH,
   DB_NAME,
   DB_VERSION,
@@ -76,10 +75,10 @@ const PASSPHRASE_MAX = 128;
 const GOOGLE_KEY_REGEX = /^AIza[0-9A-Za-z\-_]{35}$/;
 
 // ──────────────────────────────────────────────────────────────────────────────
-// 메모리 내 DEK 관리 (lockAll 대상)
+// 메모리 내 plaintextKey 관리 (lockAll 대상)
 // ──────────────────────────────────────────────────────────────────────────────
 
-const inMemoryDeks = new Set<Uint8Array<ArrayBuffer>>();
+const inMemoryPlaintextKeys = new Set<Uint8Array<ArrayBuffer>>();
 
 // ──────────────────────────────────────────────────────────────────────────────
 // 내부 검증 헬퍼
@@ -124,7 +123,17 @@ function validateKeyFormat(
 // ──────────────────────────────────────────────────────────────────────────────
 
 /**
- * API key를 AES-GCM envelope encryption으로 암호화하여 IndexedDB에 저장.
+ * API key를 Web Crypto AES-GCM + PBKDF2 + non-extractable CryptoKey로 암호화하여 IndexedDB에 저장 (V2 schema).
+ *
+ * 저장 흐름:
+ *   1. validate passphrase (8~128) + validate keyFormat
+ *   2. 중복 check (KeyAlreadyExistsError)
+ *   3. salt = getRandomValues(16 byte)
+ *   4. KEK = deriveKEK(passphrase, salt, PBKDF2-SHA-256 600k, AES-GCM, extractable:false)
+ *   5. {iv, ciphertext} = encryptApiKey(KEK, plaintextKey)
+ *   6. keyFingerprint = SHA-256(plaintextKey).slice(0,16)
+ *   7. zeroFill(plaintextKey) (best-effort, JS GC 비결정성 한계)
+ *   8. record V2 put: {version:2, ciphertext, iv, salt, ...}
  *
  * passphrase 분실 시 record 삭제 후 재등록만 가능 — 복구 불가 (Precondition 1).
  * caller는 plaintextKey 전달 전 Uint8Array<ArrayBuffer>로 변환 의무.
@@ -153,32 +162,33 @@ export async function saveKey(args: {
     if (!(e instanceof KeyNotFoundError)) throw e;
   }
 
-  // 3. salt 생성 + KEK 유도 + DEK 생성 + wrap
+  // 3. salt 생성 + KEK 유도
   const salt = crypto.getRandomValues(
     new Uint8Array(new ArrayBuffer(SALT_LENGTH_BYTES))
   );
   const kek = await deriveKEK(args.passphrase, salt);
-  const rawDEK = generateDEK();
-  const { iv, ciphertext } = await wrapDEK(kek, rawDEK);
 
-  // 4. plaintext key fingerprint 계산
+  // 4. plaintextKey 직접 AES-GCM encrypt (V2: DEK 개념 제거)
+  const { iv, ciphertext } = await encryptApiKey(kek, args.plaintextKey);
+
+  // 5. plaintext key fingerprint 계산
   const keyFingerprint = await computeFingerprint(args.plaintextKey);
 
-  // 5. rawDEK zero-fill (best-effort, JS GC 비결정성 한계, Precondition 1 JSDoc 참조)
-  zeroFill(rawDEK);
+  // 6. plaintextKey zero-fill (best-effort, JS GC 비결정성 한계, Precondition 1 JSDoc 참조)
+  zeroFill(args.plaintextKey);
 
-  // 6. record 저장
+  // 7. record V2 저장
   const now = new Date().toISOString();
   await putRecord({
-    version: 1,
+    version: 2,
     userId: args.userId,
     provider: args.provider,
     providerId: args.providerId,
     keyName: args.keyName,
-    wrappedDekIv: toBase64Url(iv),
-    wrappedDekCiphertext: toBase64Url(
+    ciphertext: toBase64Url(
       new Uint8Array(ciphertext) as Uint8Array<ArrayBuffer>
     ),
+    iv: toBase64Url(iv),
     salt: toBase64Url(salt),
     kdf: 'PBKDF2-SHA-256',
     iterations: 600_000,
@@ -190,13 +200,21 @@ export async function saveKey(args: {
 }
 
 /**
- * 저장된 API key를 복호화하여 raw bytes로 반환.
+ * 저장된 API key를 복호화하여 plaintextKey raw bytes로 반환 (V2 schema).
  *
- * Round 1 F2 amend: raw bytes 반환. caller는 BE 헤더 1회성 조립 후 즉시 zeroFill 의무 (ADR-004 §c).
+ * 복호화 흐름:
+ *   1. record 조회 (record.version !== 2 → NeedsKeyReentryError)
+ *   2. KEK = deriveKEK(passphrase, salt)
+ *   3. plaintextKey = decryptApiKey(KEK, iv, ciphertext)
+ *   4. inMemoryPlaintextKeys 등록 (lockAll 대상)
+ *   5. plaintextKey 반환 — caller zero-fill 의무 (ADR-004 §c)
+ *
+ * caller는 BE 헤더 1회성 조립 후 즉시 zeroFill 의무 (ADR-004 §c).
  * passphrase 분실 시 record 삭제 후 재등록만 가능 (복구 불가, Precondition 1).
  *
  * @throws PassphraseIncorrectError — 잘못된 passphrase (AES-GCM auth tag 실패)
  * @throws KeyNotFoundError — 해당 record 없음
+ * @throws NeedsKeyReentryError — V1 record — 자동 migration 불가, 재등록 의무
  */
 export async function unwrapKey(args: {
   userId: string;
@@ -205,38 +223,39 @@ export async function unwrapKey(args: {
   passphrase: string;
 }): Promise<Uint8Array<ArrayBuffer>> {
   const record = await getRecord(args.userId, args.provider, args.keyName);
+
+  // V1 record 자동 migration 불가 — 재등록 의무
+  if (record.version !== 2) {
+    throw new NeedsKeyReentryError(
+      `record version ${record.version}은 V2 schema와 호환되지 않습니다. ` +
+        '삭제 후 재등록 의무 (자동 migration 불가).'
+    );
+  }
+
   const salt = fromBase64Url(record.salt);
-  const iv = fromBase64Url(record.wrappedDekIv);
-  const ciphertext = fromBase64Url(record.wrappedDekCiphertext);
+  const iv = fromBase64Url(record.iv);
+  const ciphertext = fromBase64Url(record.ciphertext);
   const kek = await deriveKEK(args.passphrase, salt);
-  const rawDEK = await unwrapDEK(kek, iv, ciphertext);
+  const plaintextKey = await decryptApiKey(kek, iv, ciphertext);
+
   // lockAll() 시 wipe 대상으로 등록
-  inMemoryDeks.add(rawDEK);
-  return rawDEK;
+  inMemoryPlaintextKeys.add(plaintextKey);
+  return plaintextKey;
 }
 
 /**
  * userId에 속한 key 목록 조회.
- * 민감 필드(wrappedDekIv, wrappedDekCiphertext, salt)는 제거하여 반환.
+ * 민감 필드(ciphertext, iv, salt)는 제거하여 반환.
  */
 export async function listKeys(
   userId: string,
   filter?: { provider?: ApiProvider }
-): Promise<
-  Array<
-    Omit<StoredApiKeyRecordV1, 'wrappedDekIv' | 'wrappedDekCiphertext' | 'salt'>
-  >
-> {
+): Promise<Array<Omit<StoredApiKeyRecord, 'ciphertext' | 'iv' | 'salt'>>> {
   const records = await listRecordsStorage(userId, filter);
   return records.map((r) => {
-    const {
-      wrappedDekIv: _iv,
-      wrappedDekCiphertext: _ct,
-      salt: _s,
-      ...rest
-    } = r;
-    void _iv;
+    const { ciphertext: _ct, iv: _iv, salt: _s, ...rest } = r;
     void _ct;
+    void _iv;
     void _s;
     return rest;
   });
@@ -271,7 +290,7 @@ export async function getKeyFingerprint(
 /**
  * userId 기준 전체 key record 삭제 (logout 시 호출).
  *
- * CodeRabbit Group C amend: clearUserRecords 호출 후 inMemoryDeks 잔존을 방지하기 위해
+ * CodeRabbit Group C amend: clearUserRecords 호출 후 inMemoryPlaintextKeys 잔존을 방지하기 위해
  * lockAll()을 자동으로 호출한다. unwrapKey로 꺼낸 raw bytes가 메모리에 남아 있으면
  * IndexedDB 레코드 삭제 후에도 보안 기대(ADR-004 §c)를 어긋나게 할 수 있다.
  */
@@ -281,14 +300,14 @@ export async function clearAllKeys(userId: string): Promise<void> {
 }
 
 /**
- * 메모리에 남아 있는 DEK raw bytes를 모두 zero-fill.
+ * 메모리에 남아 있는 plaintextKey raw bytes를 모두 zero-fill.
  * beforeunload 이벤트 + explicit logout 시 호출.
  */
 export function lockAll(): void {
-  for (const dek of inMemoryDeks) {
-    zeroFill(dek);
+  for (const key of inMemoryPlaintextKeys) {
+    zeroFill(key);
   }
-  inMemoryDeks.clear();
+  inMemoryPlaintextKeys.clear();
 }
 
 // beforeunload 시 자동 lockAll (클라이언트 전용)

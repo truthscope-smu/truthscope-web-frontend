@@ -4,16 +4,14 @@ import 'fake-indexeddb/auto';
 import { describe, it, expect } from 'vitest';
 import {
   deriveKEK,
-  wrapDEK,
-  unwrapDEK,
-  generateDEK,
+  encryptApiKey,
+  decryptApiKey,
   computeFingerprint,
   zeroFill,
   toBase64Url,
   fromBase64Url,
   SALT_LENGTH_BYTES,
   IV_LENGTH_BYTES,
-  DEK_LENGTH_BYTES,
   FINGERPRINT_HEX_LENGTH,
 } from '@/05-features/byok/lib/crypto';
 import { PassphraseIncorrectError } from '@/05-features/byok/lib/types';
@@ -23,6 +21,13 @@ function makeSalt(): Uint8Array<ArrayBuffer> {
   return crypto.getRandomValues(
     new Uint8Array(new ArrayBuffer(SALT_LENGTH_BYTES))
   );
+}
+
+// 테스트 헬퍼: 샘플 plaintextKey 생성 (Google AI key 형식)
+function makePlaintextKey(): Uint8Array<ArrayBuffer> {
+  return new TextEncoder().encode(
+    'AIzaSyTestKeyAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+  ) as Uint8Array<ArrayBuffer>;
 }
 
 describe('crypto.ts', () => {
@@ -37,14 +42,14 @@ describe('crypto.ts', () => {
       const kek2 = await deriveKEK(passphrase, salt);
 
       // 같은 KEK로 암호화/복호화가 가능한지 검증 (CryptoKey 직접 비교 불가)
-      const dek = generateDEK();
-      const { iv, ciphertext } = await wrapDEK(kek1, dek);
-      const decrypted = await unwrapDEK(
+      const plaintextKey = makePlaintextKey();
+      const { iv, ciphertext } = await encryptApiKey(kek1, plaintextKey);
+      const decrypted = await decryptApiKey(
         kek2,
         iv,
         new Uint8Array(ciphertext) as Uint8Array<ArrayBuffer>
       );
-      expect(Array.from(decrypted)).toEqual(Array.from(dek));
+      expect(Array.from(decrypted)).toEqual(Array.from(plaintextKey));
     });
 
     it('다른 salt → 다른 KEK (동일 passphrase, 동일 plaintext + 다른 KEK → 복호화 실패)', async () => {
@@ -54,10 +59,10 @@ describe('crypto.ts', () => {
       const kek1 = await deriveKEK(passphrase, salt1);
       const kek2 = await deriveKEK(passphrase, salt2);
 
-      const dek = generateDEK();
-      const { iv, ciphertext } = await wrapDEK(kek1, dek);
+      const plaintextKey = makePlaintextKey();
+      const { iv, ciphertext } = await encryptApiKey(kek1, plaintextKey);
       await expect(
-        unwrapDEK(
+        decryptApiKey(
           kek2,
           iv,
           new Uint8Array(ciphertext) as Uint8Array<ArrayBuffer>
@@ -67,33 +72,33 @@ describe('crypto.ts', () => {
   });
 
   // ──────────────────────────────────────────────────────────
-  // AES-GCM wrap / unwrap
+  // AES-GCM encryptApiKey / decryptApiKey (V2 단일 KEK 암복호화)
   // ──────────────────────────────────────────────────────────
-  describe('AES-GCM wrap/unwrap', () => {
-    it('roundtrip: wrap → unwrap → 원본 rawDEK 동일', async () => {
+  describe('AES-GCM encryptApiKey / decryptApiKey', () => {
+    it('roundtrip: encryptApiKey → decryptApiKey → 원본 plaintextKey 동일', async () => {
       const salt = makeSalt();
       const kek = await deriveKEK('roundtrip-passphrase-ok', salt);
-      const dek = generateDEK();
+      const plaintextKey = makePlaintextKey();
 
-      const { iv, ciphertext } = await wrapDEK(kek, dek);
-      const decrypted = await unwrapDEK(
+      const { iv, ciphertext } = await encryptApiKey(kek, plaintextKey);
+      const decrypted = await decryptApiKey(
         kek,
         iv,
         new Uint8Array(ciphertext) as Uint8Array<ArrayBuffer>
       );
 
-      expect(Array.from(decrypted)).toEqual(Array.from(dek));
+      expect(Array.from(decrypted)).toEqual(Array.from(plaintextKey));
     });
 
     it('wrong passphrase → PassphraseIncorrectError throw (auth tag fail)', async () => {
       const salt = makeSalt();
       const kek = await deriveKEK('correct-passphrase-123', salt);
       const wrongKek = await deriveKEK('wrong-passphrase-456', salt);
-      const dek = generateDEK();
+      const plaintextKey = makePlaintextKey();
 
-      const { iv, ciphertext } = await wrapDEK(kek, dek);
+      const { iv, ciphertext } = await encryptApiKey(kek, plaintextKey);
       await expect(
-        unwrapDEK(
+        decryptApiKey(
           wrongKek,
           iv,
           new Uint8Array(ciphertext) as Uint8Array<ArrayBuffer>
@@ -102,52 +107,32 @@ describe('crypto.ts', () => {
     });
 
     // Round 1 F5 amend: IV uniqueness 검증 — 무력화 A FAIL 보장 의무
-    it('IV uniqueness: 동일 plaintext 두 번 wrap 시 IV 서로 다름', async () => {
+    it('IV uniqueness: 동일 plaintextKey 두 번 encrypt 시 IV 서로 다름', async () => {
       const salt = makeSalt();
       const kek = await deriveKEK('iv-uniqueness-test-123', salt);
-      const dek = generateDEK();
+      const plaintextKey = makePlaintextKey();
 
-      const r1 = await wrapDEK(kek, dek);
-      const r2 = await wrapDEK(kek, dek);
+      const r1 = await encryptApiKey(kek, plaintextKey);
+      const r2 = await encryptApiKey(kek, plaintextKey);
 
       expect(Array.from(r1.iv)).not.toEqual(Array.from(r2.iv));
     });
 
-    it('ciphertext는 rawDEK 원문과 달라야 함 (암호화 적용 검증)', async () => {
+    it('ciphertext는 plaintextKey 원문과 달라야 함 (암호화 적용 검증)', async () => {
       const salt = makeSalt();
-      const kek = await deriveKEK('envelope-check-passphrase', salt);
-      const dek = generateDEK();
+      const kek = await deriveKEK('encrypt-check-passphrase', salt);
+      const plaintextKey = makePlaintextKey();
 
-      const { ciphertext } = await wrapDEK(kek, dek);
+      const { ciphertext } = await encryptApiKey(kek, plaintextKey);
       const ciphertextBytes = new Uint8Array(ciphertext);
 
       // ciphertext 크기는 plaintext + GCM auth tag (16 byte)
       // 원문과 일치하지 않아야 함 (암호화 검증)
-      expect(ciphertextBytes.length).toBeGreaterThan(DEK_LENGTH_BYTES);
-      // 앞 DEK_LENGTH_BYTES 바이트가 원문과 같으면 암호화 미적용
+      expect(ciphertextBytes.length).toBeGreaterThan(plaintextKey.length);
+      // 앞 plaintextKey.length 바이트가 원문과 같으면 암호화 미적용
       expect(
-        Array.from(ciphertextBytes.slice(0, DEK_LENGTH_BYTES))
-      ).not.toEqual(Array.from(dek));
-    });
-  });
-
-  // ──────────────────────────────────────────────────────────
-  // generateDEK
-  // ──────────────────────────────────────────────────────────
-  describe('generateDEK', () => {
-    it(`${DEK_LENGTH_BYTES} byte random Uint8Array<ArrayBuffer> 반환`, () => {
-      const dek = generateDEK();
-      expect(dek).toBeInstanceOf(Uint8Array);
-      expect(dek.length).toBe(DEK_LENGTH_BYTES);
-      expect(dek.buffer).toBeInstanceOf(ArrayBuffer);
-    });
-
-    it('16 sample 모두 disjoint (random 분포 검증)', () => {
-      const seen = new Set<string>();
-      for (let i = 0; i < 16; i++) {
-        seen.add(Array.from(generateDEK()).join(','));
-      }
-      expect(seen.size).toBe(16);
+        Array.from(ciphertextBytes.slice(0, plaintextKey.length))
+      ).not.toEqual(Array.from(plaintextKey));
     });
   });
 
