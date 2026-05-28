@@ -101,11 +101,11 @@ export function zeroFill(buf: Uint8Array<ArrayBuffer>): void {
 }
 
 // Uint8Array.toBase64() ES2026 V8 미구현이라 수동 구현.
+// noUncheckedIndexedAccess 대응: Array.from()으로 안전하게 순회
 export function toBase64Url(buf: Uint8Array<ArrayBuffer>): string {
-  let binary = '';
-  for (let i = 0; i < buf.length; i++) {
-    binary += String.fromCharCode(buf[i]);
-  }
+  const binary = Array.from(buf)
+    .map((b) => String.fromCharCode(b))
+    .join('');
   return btoa(binary)
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
