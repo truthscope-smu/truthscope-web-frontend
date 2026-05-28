@@ -30,7 +30,7 @@ const iv = new Uint8Array(new ArrayBuffer(IV_LENGTH_BYTES));
 
 ### Fail (예상 — 실측 FAIL 확인됨)
 
-```
+```text
 RUN  v4.1.5 ...
 
  FAIL  |unit| src/05-features/byok/lib/__tests__/crypto.test.ts > crypto.ts > AES-GCM wrap/unwrap > IV uniqueness: 동일 plaintext 두 번 wrap 시 IV 서로 다름
@@ -55,7 +55,7 @@ Test Files  1 failed | 4 passed (5)
 
 원복 후 (정상 라인 복구: `crypto.getRandomValues(iv);`):
 
-```
+```text
 RUN  v4.1.5 ...
 
  Test Files  5 passed (5)
@@ -99,7 +99,7 @@ return { iv, ciphertext };
 
 ### Fail (예상 — 실측 FAIL 확인됨)
 
-```
+```text
 RUN  v4.1.5 ...
 
  Test Files  2 failed | 3 passed (5)
@@ -124,7 +124,7 @@ roundtrip이 실패하므로 lifecycle 전체가 연쇄적으로 FAIL
 
 원복 후 (정상 encrypt 라인 복구):
 
-```
+```text
 RUN  v4.1.5 ...
 
  Test Files  5 passed (5)
@@ -157,7 +157,7 @@ export type ApiProvider = 'gemini' | 'fact-check' | 'custom';
 
 ### Fail (예상 — 실측 FAIL 확인됨)
 
-```
+```text
 > npm run typecheck
 
 src/05-features/byok/lib/__stories__/byok-lib-happy-path.stories.tsx(24,57):
@@ -178,7 +178,7 @@ src/05-features/byok/lib/__tests__/lifecycle.test.ts(40,21):
 
 원복 후 (정상 `'google-ai' | 'google-fact-check' | 'custom'` 복구):
 
-```
+```text
 > npm run typecheck
 
 (출력 없음 — 컴파일 성공)
