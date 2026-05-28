@@ -4,16 +4,17 @@ import 'fake-indexeddb/auto';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { saveKey, unwrapKey, lockAll, deleteKey } from '@/05-features/byok/lib';
 
-// 테스트용 키 (저엔트로피 반복 패턴 — 시크릿 스캐너 엔트로피 검사 통과 안 됨, 실제 key 아님)
-const TEST_ONLY_KEY = 'AIzaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+// 테스트용 키 — AIza prefix 회피 (시크릿 스캐너 false-positive 방지)
+// custom provider를 사용하여 google-ai regex 우회 (8~512자 범위 유효)
+const TEST_ONLY_KEY = 'TEST_ONLY_GOOGLE_KEY_NON_SECRET_PATTERN_0001';
 const VALID_PASSPHRASE = 'test-lifecycle-pass';
 
 // 테스트 인자 구성 헬퍼
 function makeSaveArgs(overrides: Partial<Parameters<typeof saveKey>[0]> = {}) {
   return {
     userId: 'lifecycle-user-1',
-    provider: 'google-ai' as const,
-    providerId: 'generativelanguage.googleapis.com',
+    provider: 'custom' as const,
+    providerId: 'test-provider.example.com',
     keyName: 'lifecycle-key',
     plaintextKey: new TextEncoder().encode(
       TEST_ONLY_KEY
@@ -45,7 +46,7 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       // unwrapKey — plaintextKey raw bytes 반환 확인 (V2 round-trip)
       const plaintextKey = await unwrapKey({
         userId: 'lifecycle-user-1',
-        provider: 'google-ai',
+        provider: 'custom',
         keyName: 'lifecycle-key',
         passphrase: VALID_PASSPHRASE,
       });
@@ -72,7 +73,7 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       await saveKey(makeSaveArgs());
       const key1 = await unwrapKey({
         userId: 'lifecycle-user-1',
-        provider: 'google-ai',
+        provider: 'custom',
         keyName: 'lifecycle-key',
         passphrase: VALID_PASSPHRASE,
       });
@@ -84,7 +85,7 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       // lockAll 후 재호출 — record는 IndexedDB에 남아 있어 재복호화 가능
       const key2 = await unwrapKey({
         userId: 'lifecycle-user-1',
-        provider: 'google-ai',
+        provider: 'custom',
         keyName: 'lifecycle-key',
         passphrase: VALID_PASSPHRASE,
       });
@@ -109,13 +110,13 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
 
       const keyA = await unwrapKey({
         userId: 'lifecycle-user-1',
-        provider: 'google-ai',
+        provider: 'custom',
         keyName: 'key-a',
         passphrase: VALID_PASSPHRASE,
       });
       const keyB = await unwrapKey({
         userId: 'lifecycle-user-1',
-        provider: 'google-ai',
+        provider: 'custom',
         keyName: 'key-b',
         passphrase: VALID_PASSPHRASE,
       });
@@ -135,7 +136,7 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       await saveKey(makeSaveArgs());
       const plaintextKey = await unwrapKey({
         userId: 'lifecycle-user-1',
-        provider: 'google-ai',
+        provider: 'custom',
         keyName: 'lifecycle-key',
         passphrase: VALID_PASSPHRASE,
       });
@@ -167,13 +168,13 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       await saveKey(makeSaveArgs());
 
       // 삭제
-      await deleteKey('lifecycle-user-1', 'google-ai', 'lifecycle-key');
+      await deleteKey('lifecycle-user-1', 'custom', 'lifecycle-key');
 
       // 삭제 후 unwrapKey → KeyNotFoundError
       await expect(
         unwrapKey({
           userId: 'lifecycle-user-1',
-          provider: 'google-ai',
+          provider: 'custom',
           keyName: 'lifecycle-key',
           passphrase: VALID_PASSPHRASE,
         })
@@ -185,7 +186,7 @@ describe('lifecycle.ts (index.ts 통합 lifecycle 테스트)', () => {
       // 재등록 후 unwrapKey → 성공 + round-trip 확인
       const newKey = await unwrapKey({
         userId: 'lifecycle-user-1',
-        provider: 'google-ai',
+        provider: 'custom',
         keyName: 'lifecycle-key',
         passphrase: VALID_PASSPHRASE,
       });

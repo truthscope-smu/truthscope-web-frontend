@@ -14,13 +14,13 @@ import {
 import {
   KeyAlreadyExistsError,
   KeyNotFoundError,
-  type StoredApiKeyRecord,
+  type StoredApiKeyRecordV2,
 } from '@/05-features/byok/lib/types';
 
-// 테스트용 샘플 V2 record 생성 헬퍼
+// 테스트용 샘플 V2 record 생성 헬퍼 (storage.test는 V2 schema만 사용)
 const sampleRecord = (
-  overrides: Partial<StoredApiKeyRecord> = {}
-): StoredApiKeyRecord => ({
+  overrides: Partial<StoredApiKeyRecordV2> = {}
+): StoredApiKeyRecordV2 => ({
   version: 2,
   userId: 'user-1',
   provider: 'google-ai',
@@ -34,7 +34,7 @@ const sampleRecord = (
   salt: 'c2x0c2x0c2x0c2x0',
   kdf: 'PBKDF2-SHA-256',
   iterations: 600_000,
-  keyFingerprint: 'a1b2c3d4e5f60718',
+  keyFingerprint: 'fingerprint-test-v1',
   fingerprintVersion: 1,
   createdAt: '2026-05-28T00:00:00.000Z',
   updatedAt: '2026-05-28T00:00:00.000Z',
@@ -87,12 +87,16 @@ describe('storage.ts', () => {
         record.keyName
       );
 
+      // putRecord는 항상 V2로 저장하므로 version 확인 후 V2 필드 접근
+      expect(retrieved.version).toBe(2);
       expect(retrieved.userId).toBe(record.userId);
       expect(retrieved.provider).toBe(record.provider);
       expect(retrieved.keyName).toBe(record.keyName);
       expect(retrieved.keyFingerprint).toBe(record.keyFingerprint);
-      expect(retrieved.iv).toBe(record.iv);
-      expect(retrieved.ciphertext).toBe(record.ciphertext);
+      if (retrieved.version === 2) {
+        expect(retrieved.iv).toBe(record.iv);
+        expect(retrieved.ciphertext).toBe(record.ciphertext);
+      }
     });
 
     it('pk 필드가 반환 결과에 포함되지 않음', async () => {
