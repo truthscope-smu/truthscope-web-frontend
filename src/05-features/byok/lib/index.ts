@@ -270,9 +270,14 @@ export async function getKeyFingerprint(
 
 /**
  * userId 기준 전체 key record 삭제 (logout 시 호출).
+ *
+ * CodeRabbit Group C amend: clearUserRecords 호출 후 inMemoryDeks 잔존을 방지하기 위해
+ * lockAll()을 자동으로 호출한다. unwrapKey로 꺼낸 raw bytes가 메모리에 남아 있으면
+ * IndexedDB 레코드 삭제 후에도 보안 기대(ADR-004 §c)를 어긋나게 할 수 있다.
  */
 export async function clearAllKeys(userId: string): Promise<void> {
   await clearUserRecords(userId);
+  lockAll();
 }
 
 /**

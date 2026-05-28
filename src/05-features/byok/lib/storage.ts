@@ -20,13 +20,14 @@ export const DB_NAME = 'truthscope-byok';
 export const DB_VERSION = 1;
 export const STORE_NAME = 'keys';
 
-// primary key 조합 헬퍼
+// primary key 조합 헬퍼 — JSON.stringify([userId, provider, keyName]) 직렬화로
+// ':' 포함 입력에서 발생하는 PK 충돌을 방지한다 (CodeRabbit Group C amend).
 function primaryKey(
   userId: string,
   provider: ApiProvider,
   keyName: string
 ): string {
-  return `${userId}:${provider}:${keyName}`;
+  return JSON.stringify([userId, provider, keyName]);
 }
 
 // IndexedDB 연결 헬퍼 (매 호출마다 열고 닫는 단순 패턴)
@@ -116,22 +117,9 @@ export async function putRecord(record: StoredApiKeyRecordV1): Promise<void> {
   const pk = primaryKey(record.userId, record.provider, record.keyName);
   const db = await openDB();
   try {
-    // 먼저 존재 여부 확인 (readwrite 전에 readonly로 확인)
-    const existing = await new Promise<unknown>((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.get(pk);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-
-    if (existing !== undefined && existing !== null) {
-      throw new KeyAlreadyExistsError(
-        `${pk} already exists. Use deleteKey then saveKey to replace.`
-      );
-    }
-
-    // 신규 저장
+    // add() 직접 호출로 exist-check + add() 2단계 race condition을 제거한다.
+    // IDBObjectStore.add()는 atomic — 중복 PK 시 ConstraintError를 던진다.
+    // CodeRabbit Group C amend: exist check 제거 + ConstraintError → KeyAlreadyExistsError 변환.
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
@@ -139,7 +127,18 @@ export async function putRecord(record: StoredApiKeyRecordV1): Promise<void> {
       const recordWithPk = { ...record, pk };
       const req = store.add(recordWithPk);
       req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
+      req.onerror = () => {
+        const err = req.error;
+        if (err?.name === 'ConstraintError') {
+          reject(
+            new KeyAlreadyExistsError(
+              `${pk} already exists. Use deleteKey then saveKey to replace.`
+            )
+          );
+        } else {
+          reject(err ?? new Error('putRecord add() failed'));
+        }
+      };
     });
   } finally {
     db.close();

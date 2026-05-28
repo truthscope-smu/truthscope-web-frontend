@@ -45,8 +45,11 @@ describe('storage.ts', () => {
   beforeEach(async () => {
     const { IDBFactory } = await import('fake-indexeddb');
     // globalThis.indexedDB 교체 (테스트 격리용)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (globalThis as any).indexedDB = new IDBFactory();
+    Object.defineProperty(globalThis, 'indexedDB', {
+      value: new IDBFactory(),
+      configurable: true,
+      writable: true,
+    });
   });
 
   // ──────────────────────────────────────────────────────────
