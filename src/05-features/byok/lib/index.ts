@@ -245,19 +245,40 @@ export async function unwrapKey(args: {
 
 /**
  * userId에 속한 key 목록 조회.
- * 민감 필드(ciphertext, iv, salt)는 제거하여 반환.
+ * V2 민감 필드(ciphertext, iv, salt), V1 민감 필드(wrappedDekIv, wrappedDekCiphertext, salt)는 제거하여 반환.
+ * V1 record는 NeedsKeyReentryError 대상이므로 목록에만 노출되고 unwrap 불가 (caller 인지 의무).
  */
 export async function listKeys(
   userId: string,
   filter?: { provider?: ApiProvider }
-): Promise<Array<Omit<StoredApiKeyRecord, 'ciphertext' | 'iv' | 'salt'>>> {
+): Promise<
+  Array<
+    Omit<
+      StoredApiKeyRecord,
+      'ciphertext' | 'iv' | 'salt' | 'wrappedDekIv' | 'wrappedDekCiphertext'
+    >
+  >
+> {
   const records = await listRecordsStorage(userId, filter);
   return records.map((r) => {
-    const { ciphertext: _ct, iv: _iv, salt: _s, ...rest } = r;
+    const { salt: _s, ..._rest } = r as Record<string, unknown>;
+    // V2 민감 필드 제거
+    void _s;
+    const {
+      ciphertext: _ct,
+      iv: _iv,
+      wrappedDekIv: _wiv,
+      wrappedDekCiphertext: _wct,
+      ...rest
+    } = _rest;
     void _ct;
     void _iv;
-    void _s;
-    return rest;
+    void _wiv;
+    void _wct;
+    return rest as Omit<
+      StoredApiKeyRecord,
+      'ciphertext' | 'iv' | 'salt' | 'wrappedDekIv' | 'wrappedDekCiphertext'
+    >;
   });
 }
 
@@ -295,8 +316,12 @@ export async function getKeyFingerprint(
  * IndexedDB 레코드 삭제 후에도 보안 기대(ADR-004 §c)를 어긋나게 할 수 있다.
  */
 export async function clearAllKeys(userId: string): Promise<void> {
-  await clearUserRecords(userId);
-  lockAll();
+  try {
+    await clearUserRecords(userId);
+  } finally {
+    // clearUserRecords 실패 시에도 inMemoryPlaintextKeys zero-fill 보장 (ADR-004 §c)
+    lockAll();
+  }
 }
 
 /**

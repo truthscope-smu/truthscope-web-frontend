@@ -77,8 +77,12 @@ export type StoredApiKeyRecordV2 = {
   readonly updatedAt: string;
 };
 
-/** storage 레이어에서 사용하는 현행 record 타입 */
-export type StoredApiKeyRecord = StoredApiKeyRecordV2;
+/**
+ * storage 레이어에서 반환될 수 있는 record 타입.
+ * V1은 deprecated이지만 legacy record 읽기 경로(record.version !== 2 검사)에서 발생 가능.
+ * getRecord / listRecords 호출자는 V1 record 수신 시 NeedsKeyReentryError throw 의무.
+ */
+export type StoredApiKeyRecord = StoredApiKeyRecordV1 | StoredApiKeyRecordV2;
 
 export class BYOKError extends Error {
   constructor(message: string) {

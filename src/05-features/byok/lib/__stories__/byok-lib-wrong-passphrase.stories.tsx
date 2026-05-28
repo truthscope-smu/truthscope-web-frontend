@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import {
   saveKey,
   unwrapKey,
+  KeyAlreadyExistsError,
   PassphraseIncorrectError,
 } from '@/05-features/byok/lib';
 
@@ -49,13 +50,23 @@ function WrongPassphraseForm() {
             'seed record 저장 완료 — 잘못된 passphrase로 복호화를 시도하세요'
           );
         }
-      } catch {
-        // 이미 존재하는 경우(story 재로드) 무시
-        if (mounted) {
-          setStatus('seeded');
-          setMessage(
-            'seed record 이미 존재 — 잘못된 passphrase로 복호화를 시도하세요'
-          );
+      } catch (e) {
+        if (e instanceof KeyAlreadyExistsError) {
+          // 이미 존재하는 경우(story 재로드) 정상 — seeded 상태로 전환
+          if (mounted) {
+            setStatus('seeded');
+            setMessage(
+              'seed record 이미 존재 — 잘못된 passphrase로 복호화를 시도하세요'
+            );
+          }
+        } else {
+          // 예상치 못한 저장 실패 — error 상태로 분기
+          if (mounted) {
+            setStatus('error');
+            setMessage(
+              `seed 저장 실패: ${e instanceof Error ? e.message : String(e)}`
+            );
+          }
         }
       }
     })();
@@ -124,21 +135,21 @@ function WrongPassphraseForm() {
       <div
         style={{
           padding: 'var(--spacing-10)',
-          borderRadius: 4,
+          borderRadius: 'var(--spacing-6)',
           background: 'var(--color-bg-surface-sunken)',
           marginBottom: 'var(--spacing-16)',
-          fontSize: 13,
+          fontSize: 'var(--font-body-sm-size)',
           color: seedStatusColor,
         }}
       >
         Seed 상태: {message || '초기화 중...'}
       </div>
 
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 'var(--spacing-16)' }}>
         <label
           style={{
             display: 'block',
-            marginBottom: 4,
+            marginBottom: 'var(--spacing-6)',
             fontSize: 'var(--font-body-sm-size)',
           }}
         >
@@ -153,7 +164,7 @@ function WrongPassphraseForm() {
           style={{
             width: '100%',
             padding: 'var(--spacing-8)',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             border: '1px solid var(--color-border-subtle)',
             boxSizing: 'border-box',
           }}
@@ -172,7 +183,7 @@ function WrongPassphraseForm() {
               : 'var(--color-error)',
           color: 'var(--color-text-on-error)',
           border: 'none',
-          borderRadius: 4,
+          borderRadius: 'var(--spacing-6)',
           cursor:
             status === 'loading' || status === 'idle'
               ? 'not-allowed'
@@ -188,10 +199,10 @@ function WrongPassphraseForm() {
           style={{
             marginTop: 'var(--spacing-16)',
             padding: 'var(--spacing-10)',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             background: 'var(--color-error-subtle)',
             color: 'var(--color-error)',
-            fontSize: 13,
+            fontSize: 'var(--font-body-sm-size)',
             fontFamily: 'monospace',
           }}
         >
@@ -202,9 +213,9 @@ function WrongPassphraseForm() {
       {status === 'success' && (
         <div
           style={{
-            marginTop: 16,
-            padding: 12,
-            borderRadius: 4,
+            marginTop: 'var(--spacing-16)',
+            padding: 'var(--spacing-10)',
+            borderRadius: 'var(--spacing-6)',
             background: 'var(--color-success-subtle)',
             color: 'var(--color-success-strong)',
             fontSize: 'var(--font-body-sm-size)',

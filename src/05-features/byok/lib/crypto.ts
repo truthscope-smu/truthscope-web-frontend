@@ -8,7 +8,10 @@
  * caller zero-fill 의무: decryptApiKey 반환 raw bytes는 BE 헤더 1회성 조립 후 즉시 zeroFill 호출 (ADR-004 §c).
  */
 
-import { PassphraseIncorrectError } from '@/05-features/byok/lib/types';
+import {
+  IntegrityError,
+  PassphraseIncorrectError,
+} from '@/05-features/byok/lib/types';
 
 export const PBKDF2_ITERATIONS = 600_000;
 export const PBKDF2_HASH = 'SHA-256' as const;
@@ -85,11 +88,20 @@ export async function decryptApiKey(
       ciphertext as BufferSource
     );
     return new Uint8Array(plaintext);
-  } catch {
-    // AES-GCM auth tag 검증 실패 — 잘못된 passphrase (또는 record 손상)
-    throw new PassphraseIncorrectError(
-      'AES-GCM authentication failed — wrong passphrase or corrupted record'
-    );
+  } catch (error) {
+    // AES-GCM 복호화 실패는 DOMException (name='OperationError').
+    // Web Crypto 명세상 subtle.decrypt()는 auth tag 실패 시 DOMException을 throw.
+    // jsdom/Node.js 환경별로 DOMException 인스턴스 여부 또는 name='OperationError'로 구분.
+    // IntegrityError는 fromBase64Url() 실패 등 decryptApiKey() 호출 전 단계에서 발생.
+    const isWebCryptoError =
+      error instanceof DOMException ||
+      (error instanceof Error && error.name === 'OperationError');
+    if (isWebCryptoError) {
+      throw new PassphraseIncorrectError(
+        'AES-GCM authentication failed — wrong passphrase'
+      );
+    }
+    throw new IntegrityError('Stored record has invalid IV or ciphertext data');
   }
 }
 
@@ -124,13 +136,18 @@ export function toBase64Url(buf: Uint8Array<ArrayBuffer>): string {
 }
 
 export function fromBase64Url(s: string): Uint8Array<ArrayBuffer> {
-  const padded = s.replace(/-/g, '+').replace(/_/g, '/');
-  const padding =
-    padded.length % 4 === 0 ? '' : '='.repeat(4 - (padded.length % 4));
-  const binary = atob(padded + padding);
-  const buf = new Uint8Array(new ArrayBuffer(binary.length));
-  for (let i = 0; i < binary.length; i++) {
-    buf[i] = binary.charCodeAt(i);
+  try {
+    const padded = s.replace(/-/g, '+').replace(/_/g, '/');
+    const padding =
+      padded.length % 4 === 0 ? '' : '='.repeat(4 - (padded.length % 4));
+    const binary = atob(padded + padding);
+    const buf = new Uint8Array(new ArrayBuffer(binary.length));
+    for (let i = 0; i < binary.length; i++) {
+      buf[i] = binary.charCodeAt(i);
+    }
+    return buf;
+  } catch {
+    // atob 실패 = 저장 레코드의 base64url 형식 이상 → IntegrityError
+    throw new IntegrityError('Stored record has invalid base64url data');
   }
-  return buf;
 }
