@@ -121,7 +121,7 @@ function HappyPathForm() {
         <label
           style={{
             display: 'block',
-            marginBottom: 4,
+            marginBottom: 'var(--spacing-6)',
             fontSize: 'var(--font-body-sm-size)',
           }}
         >
@@ -134,7 +134,7 @@ function HappyPathForm() {
           style={{
             width: '100%',
             padding: 'var(--spacing-8)',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             border: '1px solid var(--color-border-subtle)',
           }}
         >
@@ -148,7 +148,7 @@ function HappyPathForm() {
         <label
           style={{
             display: 'block',
-            marginBottom: 4,
+            marginBottom: 'var(--spacing-6)',
             fontSize: 'var(--font-body-sm-size)',
           }}
         >
@@ -163,7 +163,7 @@ function HappyPathForm() {
           style={{
             width: '100%',
             padding: 'var(--spacing-8)',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             border: '1px solid var(--color-border-subtle)',
             boxSizing: 'border-box',
           }}
@@ -174,7 +174,7 @@ function HappyPathForm() {
         <label
           style={{
             display: 'block',
-            marginBottom: 4,
+            marginBottom: 'var(--spacing-6)',
             fontSize: 'var(--font-body-sm-size)',
           }}
         >
@@ -193,7 +193,7 @@ function HappyPathForm() {
           style={{
             width: '100%',
             padding: 'var(--spacing-8)',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             border: '1px solid var(--color-border-subtle)',
             boxSizing: 'border-box',
           }}
@@ -212,7 +212,7 @@ function HappyPathForm() {
             background: 'var(--color-brand-primary)',
             color: 'var(--color-text-on-brand)',
             border: 'none',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             cursor: status === 'loading' ? 'not-allowed' : 'pointer',
           }}
         >
@@ -227,7 +227,7 @@ function HappyPathForm() {
             background: 'var(--color-brand-secondary)',
             color: 'var(--color-text-on-brand)',
             border: 'none',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             cursor: status === 'loading' ? 'not-allowed' : 'pointer',
           }}
         >
@@ -241,7 +241,7 @@ function HappyPathForm() {
             background: 'var(--color-text-secondary)',
             color: 'var(--color-text-on-brand)',
             border: 'none',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             cursor: 'pointer',
           }}
         >
@@ -255,7 +255,7 @@ function HappyPathForm() {
           style={{
             marginTop: 'var(--spacing-16)',
             padding: 'var(--spacing-10)',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             background:
               status === 'error'
                 ? 'var(--color-error-subtle)'
@@ -276,10 +276,10 @@ function HappyPathForm() {
           style={{
             marginTop: 'var(--spacing-8)',
             padding: 'var(--spacing-10)',
-            borderRadius: 4,
+            borderRadius: 'var(--spacing-6)',
             background: 'var(--color-bg-surface)',
             color: 'var(--color-brand-primary)',
-            fontSize: 13,
+            fontSize: 'var(--font-body-sm-size)',
             fontFamily: 'monospace',
           }}
         >

@@ -117,10 +117,10 @@ function IndexedDBUnsupportedForm() {
       <div
         style={{
           padding: 'var(--spacing-10)',
-          borderRadius: 4,
+          borderRadius: 'var(--spacing-6)',
           background: 'var(--color-bg-surface-sunken)',
           marginBottom: 'var(--spacing-16)',
-          fontSize: 13,
+          fontSize: 'var(--font-body-sm-size)',
         }}
       >
         <strong>현재 환경 상태:</strong>{' '}
@@ -135,12 +135,12 @@ function IndexedDBUnsupportedForm() {
 
       <div
         style={{
-          padding: 12,
-          borderRadius: 4,
+          padding: 'var(--spacing-10)',
+          borderRadius: 'var(--spacing-6)',
           /* amber-50: 디자인 토큰 미정의, Phase 23+ 토큰화 후보 */
           background: '#fff8e1',
           marginBottom: 'var(--spacing-16)',
-          fontSize: 13,
+          fontSize: 'var(--font-body-sm-size)',
           /* orange-800: 디자인 토큰 미정의, Phase 23+ 토큰화 후보 */
           color: '#e65100',
         }}
@@ -160,7 +160,7 @@ function IndexedDBUnsupportedForm() {
             : 'var(--color-error)',
           color: 'var(--color-text-on-error)',
           border: 'none',
-          borderRadius: 4,
+          borderRadius: 'var(--spacing-6)',
           cursor:
             isSimulating || status === 'checking' ? 'not-allowed' : 'pointer',
         }}
@@ -173,11 +173,11 @@ function IndexedDBUnsupportedForm() {
           className="error-message"
           style={{
             marginTop: 'var(--spacing-16)',
-            padding: 12,
-            borderRadius: 4,
+            padding: 'var(--spacing-10)',
+            borderRadius: 'var(--spacing-6)',
             background: 'var(--color-error-subtle)',
             color: 'var(--color-error)',
-            fontSize: 13,
+            fontSize: 'var(--font-body-sm-size)',
             fontFamily: 'monospace',
           }}
         >
@@ -188,9 +188,9 @@ function IndexedDBUnsupportedForm() {
       {status === 'available' && !isSimulating && (
         <div
           style={{
-            marginTop: 16,
-            padding: 12,
-            borderRadius: 4,
+            marginTop: 'var(--spacing-16)',
+            padding: 'var(--spacing-10)',
+            borderRadius: 'var(--spacing-6)',
             background: 'var(--color-success-subtle)',
             color: 'var(--color-success-strong)',
             fontSize: 'var(--font-body-sm-size)',
@@ -202,9 +202,9 @@ function IndexedDBUnsupportedForm() {
 
       <div
         style={{
-          marginTop: 16,
-          padding: 12,
-          borderRadius: 4,
+          marginTop: 'var(--spacing-16)',
+          padding: 'var(--spacing-10)',
+          borderRadius: 'var(--spacing-6)',
           /* indigo-50: 디자인 토큰 미정의, Phase 23+ 토큰화 후보 */
           background: '#e8eaf6',
           fontSize: 'var(--font-label-size)',
