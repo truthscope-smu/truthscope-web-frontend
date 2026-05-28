@@ -1,17 +1,19 @@
-# T1-9 회귀 시뮬레이션 ABC stdout 박제 (2026-05-28)
+# T1-9 회귀 시뮬레이션 ABC stdout 박제 (2026-05-28, V2 amend)
 
-> 실측일: 2026-05-28
+> 실측일: 2026-05-28 (Round 1) + amend 2026-05-28 (Round 2 PR #53 V2 schema)
 > 실측 환경: Windows 11 Home, Node.js 20+, vitest 4.1.5, fake-indexeddb 6.2.5
 > 브랜치: `feat/61-fe47-byok-aes-gcm-indexeddb-2026-05-28`
+>
+> V2 amend: `wrapDEK` → `encryptApiKey`, `generateDEK` 제거. 무력화 A/B 대상 함수명 정정.
 
 ---
 
-## 무력화 A — State (wrappedDekIv 재사용)
+## 무력화 A — State (encryptApiKey IV 재사용)
 
 ### 변경 내용
 
 - 파일: `src/05-features/byok/lib/crypto.ts`
-- 변경 위치: `wrapDEK` 함수 내 49~50번째 라인
+- 변경 위치: `encryptApiKey` 함수 내 IV 생성 라인
 
 변경 전 (정상):
 
@@ -33,22 +35,18 @@ const iv = new Uint8Array(new ArrayBuffer(IV_LENGTH_BYTES));
 ```text
 RUN  v4.1.5 ...
 
- FAIL  |unit| src/05-features/byok/lib/__tests__/crypto.test.ts > crypto.ts > AES-GCM wrap/unwrap > IV uniqueness: 동일 plaintext 두 번 wrap 시 IV 서로 다름
+ FAIL  |unit| src/05-features/byok/lib/__tests__/crypto.test.ts > crypto.ts > AES-GCM encryptApiKey / decryptApiKey > IV uniqueness: 동일 plaintextKey 두 번 encrypt 시 IV 서로 다름
 
 AssertionError: expected [ Array(12) ] to not deeply equal [ Array(12) ]
 
 Compared values have no visual difference.
 
- ❯ src/05-features/byok/lib/__tests__/crypto.test.ts:113:37
-    111|       const r2 = await wrapDEK(kek, dek);
-    112|
-    113|       expect(Array.from(r1.iv)).not.toEqual(Array.from(r2.iv));
-       |                                     ^
-    114|     });
-    115|
+ ❯ src/05-features/byok/lib/__tests__/crypto.test.ts
+       expect(Array.from(r1.iv)).not.toEqual(Array.from(r2.iv));
+                                     ^
 
 Test Files  1 failed | 4 passed (5)
-      Tests  1 failed | 58 passed (59)
+      Tests  1 failed | 56 passed (57)
 ```
 
 ### Recover + PASS
@@ -59,19 +57,19 @@ Test Files  1 failed | 4 passed (5)
 RUN  v4.1.5 ...
 
  Test Files  5 passed (5)
-      Tests  59 passed (59)
+      Tests  57 passed (57)
    Start at  17:34:51
    Duration  8.03s
 ```
 
 ---
 
-## 무력화 B — Business logic (envelope wrap step 우회)
+## 무력화 B — Business logic (encryptApiKey 암호화 skip)
 
 ### 변경 내용
 
 - 파일: `src/05-features/byok/lib/crypto.ts`
-- 변경 위치: `wrapDEK` 함수 내 51~56번째 라인
+- 변경 위치: `encryptApiKey` 함수 내 AES-GCM encrypt 호출 라인
 
 변경 전 (정상):
 
@@ -79,7 +77,7 @@ RUN  v4.1.5 ...
 const ciphertext = await crypto.subtle.encrypt(
   { name: 'AES-GCM', iv: iv as BufferSource },
   kek,
-  rawDEK as BufferSource
+  plaintextKey as BufferSource
 );
 return { iv, ciphertext };
 ```
@@ -88,11 +86,11 @@ return { iv, ciphertext };
 
 ```ts
 // 무력화 B: 암호화 skip, 원문 buffer 그대로 반환
-const ciphertext = rawDEK.buffer;
+const ciphertext = plaintextKey.buffer;
 // const ciphertext = await crypto.subtle.encrypt(
 //   { name: 'AES-GCM', iv: iv as BufferSource },
 //   kek,
-//   rawDEK as BufferSource
+//   plaintextKey as BufferSource
 // );
 return { iv, ciphertext };
 ```
@@ -103,20 +101,20 @@ return { iv, ciphertext };
 RUN  v4.1.5 ...
 
  Test Files  2 failed | 3 passed (5)
-      Tests  8 failed | 51 passed (59)
+      Tests  8 failed | 49 passed (57)
 
 실패 테스트 목록:
  × crypto.ts > PBKDF2 deriveKEK > 동일 passphrase + salt → 동일 KEK로 암호화 시 같은 평문 복호화 가능 (결정성 확인)
- × crypto.ts > AES-GCM wrap/unwrap > wrong passphrase → PassphraseIncorrectError throw (auth tag fail)
- × lifecycle.ts > happy path: saveKey → unwrapKey → lockAll > saveKey 저장 → unwrapKey 복호화 → lockAll zero-fill
+ × crypto.ts > AES-GCM encryptApiKey / decryptApiKey > wrong passphrase → PassphraseIncorrectError throw (auth tag fail)
+ × lifecycle.ts > happy path: saveKey → unwrapKey → lockAll > saveKey 저장 → unwrapKey 복호화 → 실제 plaintextKey 복원 → lockAll zero-fill
  × lifecycle.ts > happy path > lockAll 후 unwrapKey 재호출
- × lifecycle.ts > lockAll 여러 DEK > 여러 key unwrapKey 후 lockAll → 모두 zero-fill
- × lifecycle.ts > beforeunload > beforeunload dispatch 시 lockAll이 호출되어 DEK zero-fill
- × lifecycle.ts > deleteKey + 재등록 flow > deleteKey 후 saveKey 재등록 → 새 DEK로 unwrapKey 가능
+ × lifecycle.ts > lockAll 여러 plaintextKey > 여러 key unwrapKey 후 lockAll → 모두 zero-fill
+ × lifecycle.ts > beforeunload > beforeunload dispatch 시 lockAll이 호출되어 plaintextKey zero-fill
+ × lifecycle.ts > deleteKey + 재등록 flow > deleteKey 후 saveKey 재등록 → 새 plaintextKey로 unwrapKey 가능
  × (기타 lifecycle)
 
-원인: 암호화 skip 시 ciphertext = rawDEK.buffer
-unwrapDEK에서 AES-GCM 인증 태그 없는 데이터를 decrypt 시도 → PassphraseIncorrectError
+원인: 암호화 skip 시 ciphertext = plaintextKey.buffer
+decryptApiKey에서 AES-GCM 인증 태그 없는 데이터를 decrypt 시도 → PassphraseIncorrectError
 roundtrip이 실패하므로 lifecycle 전체가 연쇄적으로 FAIL
 ```
 
@@ -128,7 +126,7 @@ roundtrip이 실패하므로 lifecycle 전체가 연쇄적으로 FAIL
 RUN  v4.1.5 ...
 
  Test Files  5 passed (5)
-      Tests  59 passed (59)
+      Tests  57 passed (57)
    Start at  17:36:07
    Duration  8.15s
 ```
@@ -160,13 +158,13 @@ export type ApiProvider = 'gemini' | 'fact-check' | 'custom';
 ```text
 > npm run typecheck
 
-src/05-features/byok/lib/__stories__/byok-lib-happy-path.stories.tsx(24,57):
+src/05-features/byok/lib/__stories__/byok-lib-happy-path.stories.tsx:
   error TS2345: Argument of type '"google-ai"' is not assignable to parameter of type 'ApiProvider | (() => ApiProvider)'.
 
-src/05-features/byok/lib/__stories__/byok-lib-wrong-passphrase.stories.tsx(38,11):
+src/05-features/byok/lib/__stories__/byok-lib-wrong-passphrase.stories.tsx:
   error TS2322: Type '"google-ai"' is not assignable to type 'ApiProvider'.
 
-src/05-features/byok/lib/__tests__/lifecycle.test.ts(40,21):
+src/05-features/byok/lib/__tests__/lifecycle.test.ts:
   error TS2345: ...Types of property 'provider' are incompatible.
     Type 'ApiProvider | "google-ai"' is not assignable to type 'ApiProvider'.
       Type '"google-ai"' is not assignable to type 'ApiProvider'.
@@ -190,8 +188,9 @@ src/05-features/byok/lib/__tests__/lifecycle.test.ts(40,21):
 
 | 무력화 | 계층 | FAIL 확인 | 원복 PASS | verdict |
 |--------|------|-----------|-----------|---------|
-| A (State: IV 재사용) | State | FAIL 1건: IV uniqueness 테스트 | 59/59 PASS | PASS |
-| B (Logic: wrap step 우회) | Business Logic | FAIL 8건: roundtrip + lifecycle 연쇄 | 59/59 PASS | PASS |
+| A (State: IV 재사용) | State | FAIL 1건: IV uniqueness 테스트 | 57/57 PASS | PASS |
+| B (Logic: encryptApiKey 암호화 skip) | Business Logic | FAIL 8건: roundtrip + lifecycle 연쇄 | 57/57 PASS | PASS |
 | C (Contract: literal union 변경) | Contract | FAIL 14건+: TS2322/TS2345 컴파일 에러 | typecheck 0 에러 | PASS |
 
 3건 모두 FAIL 확인 → 원복 PASS 확인. 회귀 시뮬레이션 ABC 완료.
+(V2 amend: Vitest 총 케이스 59 → 57 변경. generateDEK 전용 2케이스 제거, encryptApiKey/decryptApiKey 4케이스 추가)
