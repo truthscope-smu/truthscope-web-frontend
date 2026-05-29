@@ -1,0 +1,79 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  padding: var(--spacing-6) var(--spacing-8);
+  border-radius: 999px;
+  border-left: 3px solid transparent;
+  font-size: var(--font-label-size);
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.icon {
+  line-height: 1;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.dot {
+  color: var(--color-text-secondary);
+}
+
+.relative {
+  color: var(--color-text-secondary);
+}
+
+.badge-fresh {
+  background: var(--color-success-subtle);
+  border-left-color: var(--color-success-strong);
+}
+
+.badge-fresh .icon {
+  color: var(--color-success-strong);
+}
+
+.badge-stable {
+  background: var(--color-bg-surface-raised);
+  border-left-color: var(--color-brand-secondary);
+}
+
+.badge-stable .icon {
+  color: var(--color-brand-secondary);
+}
+
+.badge-aging {
+  background: var(--color-aging-subtle);
+  border-left-color: var(--color-aging-strong);
+}
+
+.badge-aging .icon {
+  color: var(--color-aging-strong);
+}
+
+.badge-stale {
+  background: var(--color-warning-subtle);
+  border-left-color: var(--color-warning-strong);
+}
+
+.badge-stale .icon {
+  color: var(--color-warning-strong);
+}
+
+.badge-expired {
+  background: var(--color-error-subtle);
+  border-left-color: var(--color-error);
+}
+
+.badge-expired .icon {
+  color: var(--color-error);
+}
+
+.skeleton {
+  width: var(--spacing-48);
+  height: var(--spacing-20);
+  background: var(--color-bg-surface-sunken);
+}

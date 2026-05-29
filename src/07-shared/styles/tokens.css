@@ -23,6 +23,10 @@
   --color-green-50: #f0fdf4;
   --color-red-600: #dc2626;
   --color-red-50: #fef2f2;
+  --color-orange-600: #ea580c;
+  --color-orange-50: #fff7ed;
+  --color-amber-600: #d97706;
+  --color-amber-50: #fffbeb;
 
   /* --------------------------------------------------
    * Semantic Tokens — 항상 이것을 사용
@@ -69,6 +73,10 @@
   --color-success-subtle: var(--color-green-50);
   --color-error: var(--color-red-600);
   --color-error-subtle: var(--color-red-50);
+  --color-aging-strong: var(--color-orange-600);
+  --color-aging-subtle: var(--color-orange-50);
+  --color-warning-strong: var(--color-amber-600);
+  --color-warning-subtle: var(--color-amber-50);
 
   /* --------------------------------------------------
    * Typography Tokens

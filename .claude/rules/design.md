@@ -36,6 +36,7 @@ padding: var(--spacing-10);
 - Primary action / confidence signal은 `brand-primary`를 기본값으로 한다.
 - 두 번째 primary accent 도입 금지 — 회귀 방지 룰.
 - 상태색(error / success / info)은 semantic token을 유지한다 (별도 신호 채널).
+- 노후도 신호 채널: aging(orange) / warning(amber) 상태 토큰 추가 (Phase 62 FreshnessBadge). 텍스트는 어두운 공통색(text-primary)으로 두고, 상태색은 아이콘 색과 좌측 border accent 및 옅은 배경 tint에만 적용한다. 색 단독 의존 금지(WCAG 1.4.1) — 아이콘 모양과 라벨 문구로도 구별한다.
 
 **채택 근거 — 미적 취향 아닌 3 기능적 사유**:
 1. **WCAG 2.2 AA 대비 보장** (§1.4.3 Contrast Minimum) — `brand-primary` blue-900은 white/parchment surface 모두에서 텍스트 4.5:1 확보 가능. 단일 색이라 모든 surface 조합 검증이 단순화됨.

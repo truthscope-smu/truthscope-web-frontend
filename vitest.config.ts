@@ -67,6 +67,7 @@ export default defineConfig({
             'src/05-features/**/__tests__/**/*.test.{ts,tsx}',
             'src/05-features/**/model/**/*.test.ts',
             'src/05-features/**/api*.test.ts',
+            'src/04-widgets/**/lib/**/*.test.ts',
             'test/architecture.test.ts',
           ],
         },
