@@ -4,5 +4,6 @@ export type {
   FactCheckSnapshot,
   ContextSnapshot,
   RelatedArticleRef,
-  Verdict,
+  TruthLabel,
+  ClaimScoreStatus,
 } from './model/types';

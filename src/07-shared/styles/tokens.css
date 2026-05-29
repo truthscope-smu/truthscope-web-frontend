@@ -23,6 +23,10 @@
   --color-green-50: #f0fdf4;
   --color-red-600: #dc2626;
   --color-red-50: #fef2f2;
+  --color-orange-600: #ea580c;
+  --color-orange-50: #fff7ed;
+  --color-amber-600: #d97706;
+  --color-amber-50: #fffbeb;
 
   /* --------------------------------------------------
    * Semantic Tokens — 항상 이것을 사용
@@ -36,6 +40,12 @@
   /* 포인트 */
   --color-accent-blue: var(--color-blue-400);
   --color-accent-purple: var(--color-purple-600);
+
+  /* hero CTA 전용 action 색 (Phase 22 rev.1 추가, 2026-05-25)
+   * design.md §1 primary-action=brand-primary 룰의 예외 1건.
+   * 분석 시작 페이지 hero pill CTA에서만 사용. ResultCard / 일반 CTA 금지.
+   * 근거: light gradient hero canvas에서 brand-primary (blue-900)의 가시성 부족 보강 */
+  --color-action-hero: #0071e3;
 
   /* 배경 — surface 5단계 (Phase 22 v2: base/sunken/raised/elevated/floating) */
   --color-bg-base: #ffffff;
@@ -63,6 +73,10 @@
   --color-success-subtle: var(--color-green-50);
   --color-error: var(--color-red-600);
   --color-error-subtle: var(--color-red-50);
+  --color-aging-strong: var(--color-orange-600);
+  --color-aging-subtle: var(--color-orange-50);
+  --color-warning-strong: var(--color-amber-600);
+  --color-warning-subtle: var(--color-amber-50);
 
   /* --------------------------------------------------
    * Typography Tokens
