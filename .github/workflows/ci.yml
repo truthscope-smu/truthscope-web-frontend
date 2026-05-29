@@ -52,6 +52,25 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
+      # ── FSD 아키텍처 + 네이밍 + 캐시 정책 검증 ──
+
+      - name: Arch (dependency-cruiser FSD 검증)
+        run: npm run arch
+
+      - name: Check file names
+        run: npm run check:names
+
+      - name: Check cache config
+        run: npm run check:cache
+
+      # ── 브라우저 테스트 (UI + a11y) ──
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests (UI + a11y)
+        run: npm run test:browser
+
       # ── 빌드 ──
 
       - name: Build Project
