@@ -37,7 +37,7 @@ describe('FreshnessBadge — role=status aria-label', () => {
 });
 
 describe('FreshnessBadge — skeleton-to-badge transition', () => {
-  it('skeleton rendered initially (aria-hidden=true), then role=status badge appears after effect', async () => {
+  it('renders role=status badge with correct label after effect and shows no skeleton', async () => {
     const { container } = render(
       <FreshnessBadge createdAtMs={TWO_DAYS_AGO} nowMs={NOW} />
     );
