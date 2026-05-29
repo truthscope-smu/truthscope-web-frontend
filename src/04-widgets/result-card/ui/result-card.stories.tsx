@@ -4,166 +4,205 @@ import { ResultCard } from '@/04-widgets/result-card';
 const meta = {
   title: '04-widgets/ResultCard',
   component: ResultCard,
-  parameters: {
-    layout: 'centered',
-  },
+  parameters: { layout: 'centered' },
   tags: ['autodocs'],
 } satisfies Meta<typeof ResultCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Skeleton: Story = {
-  args: {
-    snapshot: undefined,
-  },
-};
+// Storybook 6 케이스 — 5 BE 정본 mock + 1 SingleSource (절충안 A' contract C 무력화 baseline) + 1 Skeleton
 
-export const Fact: Story = {
+// Round 1 C-1/CX-1 amend: ArticleFactScoreSnapshot 정본 시그니처는 value? + scorableCount? + totalClaimCount? 3 필드 only.
+// score / truthLabel 필드 부재 — phase 57 model/types.ts:10-17 정합.
+
+export const NormalScore: Story = {
   args: {
     snapshot: {
+      articleFactScore: { value: 82, scorableCount: 6, totalClaimCount: 8 },
+      siftMapping: {
+        sourceTransparency: {
+          band: 'ALL_EXPLICIT',
+          explicitCount: 5,
+          ambiguousCount: 0,
+          noneCount: 0,
+        },
+        crossSource: { tier1Count: 4, tier2Count: 2, adapterDiversity: 5 },
+        attributionLinks: [
+          { url: 'https://kostat.go.kr', label: '통계청 자료' },
+        ],
+      },
       factCheck: {
         truthLabel: 'FACT',
-        confidence: 92,
-        claim: '공식 통계 기준 전년 대비 수출액이 12.4% 증가했다.',
-        evidence: [
-          '통계청 공식 자료와 수치가 일치합니다.',
-          '관세청 수출입 통계 원문 링크 확보.',
-        ],
+        confidence: 90,
+        claim: '주장 예시',
+        evidence: ['근거 1', '근거 2'],
+      },
+      partialFailure: {
+        coverage: {
+          insufficientCount: 0,
+          timeSensitiveCount: 0,
+          outOfScopeCount: 0,
+          tier1Count: 4,
+          tier2Count: 2,
+          tier3Count: 0,
+        },
+        sourceTransparency: {
+          band: 'ALL_EXPLICIT',
+          explicitCount: 5,
+          ambiguousCount: 0,
+          noneCount: 0,
+        },
       },
       context: {
-        summary:
-          '통계청 발표 자료에 따르면 2026년 1분기 수출액은 전년 동기 대비 12.4% 증가했습니다.',
-        sourceCount: 4,
-        relatedArticles: [
-          { id: '1', title: '관세청 1분기 수출 동향 보고서', source: '관세청' },
-          { id: '2', title: '한국은행 분기별 GDP 발표', source: '한국은행' },
-        ],
+        summary: '요약 본문',
+        relatedArticles: [{ id: '1', title: '관련 기사', source: '통계청' }],
+        sourceCount: 5,
       },
     },
   },
 };
 
-export const MostlyFact: Story = {
+export const ZeroFloor: Story = {
   args: {
     snapshot: {
-      factCheck: {
-        truthLabel: 'MOSTLY_FACT',
-        confidence: 76,
-        claim: '전문가 다수는 해당 정책의 단기 효과를 긍정적으로 봤다.',
-        evidence: ['보고서 방향은 일치하지만 범위가 일부 축약됐습니다.'],
+      articleFactScore: { value: 0, scorableCount: 3, totalClaimCount: 8 },
+      siftMapping: {
+        sourceTransparency: {
+          band: 'MISSING_SOURCE',
+          explicitCount: 1,
+          ambiguousCount: 2,
+          noneCount: 5,
+        },
       },
-      context: {
-        summary: '표본 기간과 비교 대상 설명이 추가로 필요합니다.',
-        sourceCount: 3,
-      },
-    },
-  },
-};
-
-export const PartlyFact: Story = {
-  args: {
-    snapshot: {
-      factCheck: {
-        truthLabel: 'PARTLY_FACT',
-        confidence: 54,
-        claim: '지원금 증가가 청년 고용률 회복의 주된 원인이다.',
-        evidence: ['수치 방향은 맞지만 인과 설명은 확인되지 않았습니다.'],
-      },
-      context: {
-        summary: '다른 경기 변수와 정책 시차가 분리되지 않았습니다.',
-        sourceCount: 2,
-      },
-    },
-  },
-};
-
-export const MostlyNotFact: Story = {
-  args: {
-    snapshot: {
-      factCheck: {
-        truthLabel: 'MOSTLY_NOT_FACT',
-        confidence: 31,
-        claim: '해당 법안은 이미 모든 절차를 통과해 시행 중이다.',
-        evidence: [
-          '상임위 계류 상태로, 시행 중이라는 표현은 부정확합니다.',
-          '일부 조항은 별도 시행령으로 검토 중입니다.',
-        ],
-      },
-      context: {
-        summary: '법안은 입법 절차의 일부만 통과했습니다.',
-        sourceCount: 3,
-      },
-    },
-  },
-};
-
-export const NotFact: Story = {
-  args: {
-    snapshot: {
       factCheck: {
         truthLabel: 'NOT_FACT',
-        confidence: 88,
-        claim: '지난해 같은 지역의 사고 건수는 0건이었다.',
-        evidence: [
-          '공식 사고 통계에 동일 기간 18건이 기록되어 있습니다.',
-          '지자체 공개 자료 + 재난안전 포털 양쪽 모두 18건 확인.',
-        ],
+        confidence: 95,
+        claim: '오류 주장',
+        evidence: ['반박 근거 1', '반박 근거 2'],
       },
-      context: {
-        summary: '지자체 공개 자료 + 재난안전 포털 모두 18건 기록 확인.',
-        sourceCount: 2,
+      partialFailure: {
+        coverage: {
+          insufficientCount: 3,
+          timeSensitiveCount: 1,
+          outOfScopeCount: 1,
+          tier1Count: 0,
+          tier2Count: 3,
+          tier3Count: 5,
+        },
+        sourceTransparency: {
+          band: 'MISSING_SOURCE',
+          explicitCount: 1,
+          ambiguousCount: 2,
+          noneCount: 5,
+        },
       },
+      context: { summary: '에러 톤 요약', sourceCount: 2 },
     },
   },
 };
 
-export const Insufficient: Story = {
+// NoScorable: value 필드 생략 = "검증 가능 주장 없음" 상태 (phase 57 types.ts:11 정합, C-2 amend).
+// evidence 필드 생략 = INSUFFICIENT 시 근거 없음 (Round 2 CX-2 amend, 빈 배열 [] 사용 금지 contract — `evidence?.length` 분기에서 skeleton과 구분 어려움).
+export const NoScorable: Story = {
   args: {
     snapshot: {
-      factCheck: {
-        status: 'INSUFFICIENT',
-        claim: '해당 사건의 책임자는 A 회사이다.',
-        evidence: ['확인 가능한 출처가 1건뿐이며 교차 검증이 어렵습니다.'],
+      articleFactScore: { scorableCount: 0, totalClaimCount: 5 },
+      factCheck: { status: 'INSUFFICIENT', claim: '검증 불가 주장' },
+      partialFailure: {
+        coverage: {
+          insufficientCount: 3,
+          timeSensitiveCount: 1,
+          outOfScopeCount: 1,
+          tier1Count: 0,
+          tier2Count: 0,
+          tier3Count: 5,
+        },
       },
-      context: {
-        summary: '추가 1차 출처가 확인되면 재평가 가능합니다.',
-        sourceCount: 1,
-      },
+      context: { summary: '검증 가능 0개 안내', sourceCount: 2 },
     },
   },
 };
 
-export const TimeSensitive: Story = {
+export const PartialFailure: Story = {
   args: {
     snapshot: {
+      articleFactScore: { value: 65, scorableCount: 4, totalClaimCount: 8 },
+      siftMapping: {
+        sourceTransparency: {
+          band: 'SOME_UNCLEAR',
+          explicitCount: 3,
+          ambiguousCount: 2,
+          noneCount: 1,
+        },
+      },
       factCheck: {
-        status: 'TIME_SENSITIVE',
-        claim: '오늘 기준 환율은 1,380원이다.',
-        evidence: [
-          '실시간 환율 변동성이 커 시점 명시 없이는 사실성 평가가 어렵습니다.',
-        ],
+        truthLabel: 'PARTLY_FACT',
+        confidence: 70,
+        claim: '일부 사실 주장',
+        evidence: ['근거 1'],
       },
-      context: {
-        summary: '시점 정보가 명확해지면 재검증 가능합니다.',
-        sourceCount: 1,
+      partialFailure: {
+        coverage: {
+          insufficientCount: 2,
+          timeSensitiveCount: 1,
+          outOfScopeCount: 1,
+          tier1Count: 2,
+          tier2Count: 2,
+          tier3Count: 4,
+        },
+        sourceTransparency: {
+          band: 'SOME_UNCLEAR',
+          explicitCount: 3,
+          ambiguousCount: 2,
+          noneCount: 1,
+        },
       },
+      context: { summary: '부분 실패 요약', sourceCount: 3 },
     },
   },
 };
 
-export const OutOfScope: Story = {
+// SingleSource — context.sourceCount=1 → partial-failure-display 단일 출처 경고 발화 (절충안 A' contract C 무력화 baseline)
+export const SingleSource: Story = {
   args: {
     snapshot: {
+      articleFactScore: { value: 75, scorableCount: 5, totalClaimCount: 7 },
+      siftMapping: {
+        sourceTransparency: {
+          band: 'ALL_EXPLICIT',
+          explicitCount: 5,
+          ambiguousCount: 0,
+          noneCount: 0,
+        },
+      },
       factCheck: {
-        status: 'OUT_OF_SCOPE',
-        claim: '이 정책은 윤리적으로 옳다.',
-        evidence: ['가치 판단 주장은 사실 검증 범위 밖입니다.'],
+        truthLabel: 'MOSTLY_FACT',
+        confidence: 80,
+        claim: '주장 예시',
+        evidence: ['근거 1'],
       },
-      context: {
-        summary: 'TruthScope는 검증 가능한 사실 단위만 다룹니다.',
-        sourceCount: 0,
+      partialFailure: {
+        coverage: {
+          insufficientCount: 0,
+          timeSensitiveCount: 0,
+          outOfScopeCount: 0,
+          tier1Count: 3,
+          tier2Count: 2,
+          tier3Count: 0,
+        },
+        sourceTransparency: {
+          band: 'ALL_EXPLICIT',
+          explicitCount: 5,
+          ambiguousCount: 0,
+          noneCount: 0,
+        },
       },
+      context: { summary: '단일 출처 의존 baseline', sourceCount: 1 },
     },
   },
+};
+
+export const Skeleton: Story = {
+  args: { snapshot: undefined },
 };
