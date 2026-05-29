@@ -6,4 +6,5 @@ export type {
   RelatedArticleRef,
   TruthLabel,
   ClaimScoreStatus,
+  ClaimAttributionSnapshot,
 } from './model/types';

@@ -57,6 +57,22 @@ export interface ContextSnapshot {
   sourceCount?: number;
 }
 
+/**
+ * Claim 인용 표기 sub-component (#49 phase 63) — attribution 보존 (M-3, FM12).
+ * BE 매핑 예정: claims.is_quoted_claim / speaker_name / original_context (S3-09 BE #76, 별 phase).
+ * isQuotedClaim true일 때만 화자 귀속 표기 + disclaimer 노출.
+ */
+export interface ClaimAttributionSnapshot {
+  /** 인용 주장 여부. true면 화자 귀속 표기 + disclaimer. */
+  isQuotedClaim: boolean;
+  /** 주장 본문. 없거나 빈 문자열이면 skeleton. */
+  claimText?: string;
+  /** 화자 또는 주체명. isQuotedClaim일 때만 의미. 없으면 "인용된 주장" 폴백. */
+  speakerName?: string;
+  /** 인용 원문 맥락. details 펼치기로 노출 (선택). */
+  originalContext?: string;
+}
+
 export interface ResultCardSnapshot {
   /**
    * N-1 sub-component (#41 phase 57 DONE) — 기사 종합 점수.
@@ -72,6 +88,8 @@ export interface ResultCardSnapshot {
    * scorableCount/excludedCount는 derive 가능하므로 widget 노출 제외.
    */
   partialFailure?: PartialFailureSnapshot;
+  /** claim 인용 표기 sub-component (#49 phase 63) — attribution + disclaimer. */
+  claimAttribution?: ClaimAttributionSnapshot;
   /** 기존 — claim별 진실성 라벨. */
   factCheck?: FactCheckSnapshot;
   /** 기존 — 맥락 (요약 + 관련 기사 + sourceCount). */
