@@ -6,6 +6,7 @@ import { SiftMapping } from '@04-widgets/sift-mapping';
 import { PartialFailureDisplay } from '@04-widgets/partial-failure-display';
 import type { PartialFailureSnapshot } from '@04-widgets/partial-failure-display';
 import type { ResultCardSnapshot } from '@04-widgets/result-card/model/types';
+import { ClaimAttributionSection } from '@04-widgets/result-card/ui/claim-attribution-section';
 import { ContextSection } from '@04-widgets/result-card/ui/context-section';
 import { FactCheckSection } from '@04-widgets/result-card/ui/fact-check-section';
 
@@ -40,6 +41,7 @@ export function ResultCard({ snapshot, className }: Props) {
     >
       <ArticleFactScore snapshot={snapshot?.articleFactScore} />
       <SiftMapping snapshot={snapshot?.siftMapping} />
+      <ClaimAttributionSection snapshot={snapshot?.claimAttribution} />
       <FactCheckSection snapshot={snapshot?.factCheck} />
       <PartialFailureDisplay snapshot={mergedPartialFailure} />
       <ContextSection snapshot={snapshot?.context} />

@@ -32,6 +32,13 @@ export const NormalScore: Story = {
           { url: 'https://kostat.go.kr', label: '통계청 자료' },
         ],
       },
+      claimAttribution: {
+        isQuotedClaim: true,
+        speakerName: '김OO',
+        claimText: '내년 물가상승률은 2퍼센트대로 안정될 것',
+        originalContext:
+          '브리핑에서 "내년 물가상승률은 2퍼센트대로 안정될 것"이라고 밝혔다.',
+      },
       factCheck: {
         truthLabel: 'FACT',
         confidence: 90,
@@ -74,6 +81,10 @@ export const ZeroFloor: Story = {
           ambiguousCount: 2,
           noneCount: 5,
         },
+      },
+      claimAttribution: {
+        isQuotedClaim: false,
+        claimText: '비인용 — 기사 본문이 직접 단정한 주장',
       },
       factCheck: {
         truthLabel: 'NOT_FACT',

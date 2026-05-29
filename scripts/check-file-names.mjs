@@ -8,8 +8,9 @@ import { join } from 'node:path';
 
 const ROOT = 'src';
 // rev.1 CX1-06 fix: dot-role suffix (.widget, .component, .hook) 허용 추가
+// phase 63 fix: CSS Module 표준 컨벤션 .module.css만 허용 (.module은 .css에만 결합 — .module.ts/.tsx 차단).
 const ALLOWED =
-  /^([a-z0-9]+(-[a-z0-9]+)*|\[[^\]]+\])(\.(test|stories|d|spec|widget|component|hook|context|api|schema))?\.(ts|tsx|css)$/;
+  /^([a-z0-9]+(-[a-z0-9]+)*|\[[^\]]+\])(\.module\.css|(\.(test|stories|d|spec|widget|component|hook|context|api|schema))?\.(ts|tsx|css))$/;
 const SKIP_DIRS = new Set(['node_modules', '.next', 'coverage']);
 
 let violations = 0;
