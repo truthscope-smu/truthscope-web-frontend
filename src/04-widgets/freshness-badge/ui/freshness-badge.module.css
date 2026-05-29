@@ -38,11 +38,11 @@
 
 .badge-stable {
   background: var(--color-bg-surface-raised);
-  border-left-color: var(--color-info);
+  border-left-color: var(--color-brand-secondary);
 }
 
 .badge-stable .icon {
-  color: var(--color-info);
+  color: var(--color-brand-secondary);
 }
 
 .badge-aging {
