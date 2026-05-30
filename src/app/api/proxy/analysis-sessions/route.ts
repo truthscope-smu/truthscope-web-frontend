@@ -20,14 +20,15 @@ export async function POST(request: Request): Promise<Response> {
   } catch {
     body = undefined;
   }
-  // 잘못된 JSON(런타임에 따라 throw 또는 undefined 반환) + 객체가 아닌 body를 일관되게 거부.
-  if (typeof body !== 'object' || body === null) {
+  // 잘못된 JSON(런타임에 따라 throw 또는 undefined 반환) + 객체가 아닌 body(배열 포함)를 일관되게 거부.
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
     return Response.json(
       { message: '잘못된 요청 본문입니다', statusCode: 400 },
       { status: 400 }
     );
   }
 
+  // BE 응답 지연/hang이 무기한 대기로 번지지 않도록 타임아웃을 건다(15초 초과 시 504).
   let beRes: Response;
   try {
     beRes = await fetch(`${config.api.baseUrl}/analysis-sessions`, {
@@ -37,8 +38,15 @@ export async function POST(request: Request): Promise<Response> {
         Accept: 'application/json',
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(15000),
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'TimeoutError') {
+      return Response.json(
+        { message: '분석 서버 응답이 지연되고 있습니다', statusCode: 504 },
+        { status: 504 }
+      );
+    }
     return Response.json(
       { message: '분석 서버에 연결할 수 없습니다', statusCode: 502 },
       { status: 502 }

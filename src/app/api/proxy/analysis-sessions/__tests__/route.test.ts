@@ -89,4 +89,22 @@ describe('POST /api/proxy/analysis-sessions (#45 키리스 Edge 프록시)', () 
     expect(res.status).toBe(502);
     expect((await res.json()).statusCode).toBe(502);
   });
+
+  it('T4-6: 배열 body는 400을 반환하고 BE를 호출하지 않는다 (CodeRabbit Minor)', async () => {
+    const res = await POST(makeRequest([1, 2, 3]));
+
+    expect(res.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('T4-7: BE 응답 타임아웃 시 504를 반환한다 (CodeRabbit Major)', async () => {
+    fetchMock.mockRejectedValue(
+      new DOMException('The operation timed out.', 'TimeoutError')
+    );
+
+    const res = await POST(makeRequest({ url: 'https://news.example.com/a' }));
+
+    expect(res.status).toBe(504);
+    expect((await res.json()).statusCode).toBe(504);
+  });
 });
