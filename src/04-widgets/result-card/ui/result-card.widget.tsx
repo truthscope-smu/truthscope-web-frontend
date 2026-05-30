@@ -2,6 +2,7 @@
 
 import { cn } from '@/07-shared/lib/cn';
 import { ArticleFactScore } from '@04-widgets/article-fact-score';
+import { FreshnessBadge } from '@04-widgets/freshness-badge';
 import { SiftMapping } from '@04-widgets/sift-mapping';
 import { PartialFailureDisplay } from '@04-widgets/partial-failure-display';
 import type { PartialFailureSnapshot } from '@04-widgets/partial-failure-display';
@@ -39,6 +40,11 @@ export function ResultCard({ snapshot, className }: Props) {
         className
       )}
     >
+      {snapshot?.freshness && (
+        <div className="flex justify-end px-[var(--spacing-24)] pt-[var(--spacing-16)]">
+          <FreshnessBadge createdAtMs={snapshot.freshness.createdAtMs} />
+        </div>
+      )}
       <ArticleFactScore snapshot={snapshot?.articleFactScore} />
       <SiftMapping snapshot={snapshot?.siftMapping} />
       <ClaimAttributionSection snapshot={snapshot?.claimAttribution} />

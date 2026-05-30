@@ -11,10 +11,6 @@
   white-space: nowrap;
 }
 
-.icon {
-  line-height: 1;
-}
-
 .label {
   font-weight: 600;
 }
@@ -32,17 +28,9 @@
   border-left-color: var(--color-success-strong);
 }
 
-.badge-fresh .icon {
-  color: var(--color-success-strong);
-}
-
 .badge-stable {
   background: var(--color-bg-surface-raised);
   border-left-color: var(--color-brand-secondary);
-}
-
-.badge-stable .icon {
-  color: var(--color-brand-secondary);
 }
 
 .badge-aging {
@@ -50,26 +38,14 @@
   border-left-color: var(--color-aging-strong);
 }
 
-.badge-aging .icon {
-  color: var(--color-aging-strong);
-}
-
 .badge-stale {
   background: var(--color-warning-subtle);
   border-left-color: var(--color-warning-strong);
 }
 
-.badge-stale .icon {
-  color: var(--color-warning-strong);
-}
-
 .badge-expired {
   background: var(--color-error-subtle);
   border-left-color: var(--color-error);
-}
-
-.badge-expired .icon {
-  color: var(--color-error);
 }
 
 .skeleton {

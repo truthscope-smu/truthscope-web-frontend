@@ -2,7 +2,11 @@
 
 import Link from 'next/link';
 import { useArticle } from '@/app/providers/article.context';
-import { ResultCard, type ResultCardSnapshot } from '@/04-widgets/result-card';
+import {
+  ResultCard,
+  type ResultCardSnapshot,
+  freshnessSnapshotFromIso,
+} from '@/04-widgets/result-card';
 import { AttachToSessionButton } from '@/05-features/attach-to-session';
 
 export default function AnalysisDetailPage() {
@@ -28,6 +32,9 @@ export default function AnalysisDetailPage() {
   // 또는 status(3종)와 confidence/evidence가 채워지는 매핑으로 교체된다.
   const cardSnapshot: ResultCardSnapshot | undefined = snapshot
     ? {
+        // 임시 프록시 — article 추출 시각(createdAt)을 검증 시각 근사로 사용.
+        // BE verification_results.verified_at(#76) 랜딩 시 교체.
+        freshness: freshnessSnapshotFromIso(snapshot.createdAt),
         factCheck: {
           claim: snapshot.title,
         },
