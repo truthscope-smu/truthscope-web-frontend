@@ -17,12 +17,17 @@ import type { Article } from '@06-entities/article/model/article';
 /**
  * rev.7 P21-5-1: BE PR #29 6ad70ec articleId 노출.
  * `POST /analysis-sessions` 응답 {sessionId, status, articleId} → fromAnalysisSession으로 Article 합성.
+ *
+ * #45 (ADR-025): 키리스(BYOK 미설정) 분석은 same-origin Edge 프록시를 경유한다
+ * (baseUrl '' → /api/proxy/analysis-sessions). 프록시가 X-User-Gemini-Key 없이
+ * BE로 중계하고 BE가 서버 기본 키로 fallback한다. 응답은 프록시가 status+body 그대로
+ * 패스스루하므로 ArticleExtractionResponse 매핑은 영향받지 않는다.
  */
 export async function requestArticleExtraction(url: string): Promise<Article> {
   const response = await apiClient.post<
     ArticleExtractionResponse,
     ArticleExtractionRequest
-  >('/analysis-sessions', { url });
+  >('/api/proxy/analysis-sessions', { url }, { baseUrl: '' });
   return fromAnalysisSession(url, response);
 }
 
