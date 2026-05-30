@@ -29,9 +29,6 @@ export function FreshnessBadge({ createdAtMs, nowMs }: FreshnessBadgeProps) {
       aria-label={`${v.ariaPrefix} · ${relative}`}
       className={`${styles.badge} ${styles[v.className]}`}
     >
-      <span aria-hidden="true" className={styles.icon}>
-        {v.icon}
-      </span>
       <span className={styles.label}>{v.label}</span>
       <span aria-hidden="true" className={styles.dot}>
         ·

@@ -73,6 +73,17 @@ export interface ClaimAttributionSnapshot {
   originalContext?: string;
 }
 
+/**
+ * 검증 노후도 sub-component(#48 phase 62 widget, phase 64 wire).
+ */
+export interface FreshnessSnapshot {
+  /**
+   * 검증 시각(epoch ms). FreshnessBadge createdAtMs 입력.
+   * 현재 임시로 article 추출 시각(createdAt) 프록시. BE verification_results.verified_at(#76) 랜딩 시 교체.
+   */
+  createdAtMs: number;
+}
+
 export interface ResultCardSnapshot {
   /**
    * N-1 sub-component (#41 phase 57 DONE) — 기사 종합 점수.
@@ -90,6 +101,11 @@ export interface ResultCardSnapshot {
   partialFailure?: PartialFailureSnapshot;
   /** claim 인용 표기 sub-component (#49 phase 63) — attribution + disclaimer. */
   claimAttribution?: ClaimAttributionSnapshot;
+  /**
+   * 검증 노후도(#48). 임시 프록시 article.createdAt 사용,
+   * BE verification_results.verified_at(#76) 랜딩 시 교체.
+   */
+  freshness?: FreshnessSnapshot;
   /** 기존 — claim별 진실성 라벨. */
   factCheck?: FactCheckSnapshot;
   /** 기존 — 맥락 (요약 + 관련 기사 + sourceCount). */

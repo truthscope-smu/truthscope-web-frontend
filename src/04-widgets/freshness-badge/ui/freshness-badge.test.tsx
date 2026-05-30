@@ -6,8 +6,9 @@ afterEach(cleanup);
 
 // Fixed timestamps for deterministic hint computation (no wall-clock dependency)
 const NOW = 1_000_000_000_000;
-const THIRTY_MIN_AGO = NOW - 30 * 60 * 1000; // fresh
-const TWO_DAYS_AGO = NOW - 2 * 24 * 60 * 60 * 1000; // aging
+const THIRTY_MIN_AGO = NOW - 30 * 60 * 1000; // fresh (<=1h)
+const TWELVE_HOURS_AGO = NOW - 12 * 60 * 60 * 1000; // stable (>1h, <=1day)
+const TWO_DAYS_AGO = NOW - 2 * 24 * 60 * 60 * 1000; // aging (>1day, <=3day)
 
 describe('FreshnessBadge — hint label after mount', () => {
   it('shows "최신" label for a fresh createdAtMs+nowMs pair', async () => {
@@ -36,6 +37,17 @@ describe('FreshnessBadge — role=status aria-label', () => {
   });
 });
 
+describe('FreshnessBadge — stable label (검증 양호)', () => {
+  it('stable 상태는 aria-label에 검증 양호를 포함', async () => {
+    render(<FreshnessBadge createdAtMs={TWELVE_HOURS_AGO} nowMs={NOW} />);
+    await waitFor(() => {
+      const badge = screen.getAllByRole('status')[0]!;
+      const ariaLabel = badge.getAttribute('aria-label') ?? '';
+      expect(ariaLabel).toContain('검증 양호');
+    });
+  });
+});
+
 describe('FreshnessBadge — skeleton-to-badge transition', () => {
   it('renders role=status badge with correct label after effect and shows no skeleton', async () => {
     const { container } = render(
@@ -50,11 +62,11 @@ describe('FreshnessBadge — skeleton-to-badge transition', () => {
       expect(screen.getAllByRole('status').length).toBeGreaterThan(0);
     });
 
-    // Badge for aging should show "노후화"
+    // Badge for aging should show "재확인 권장"
     await waitFor(() => {
       const badge = screen.getAllByRole('status')[0]!;
       const ariaLabel = badge.getAttribute('aria-label') ?? '';
-      expect(ariaLabel).toContain('검증 노후화');
+      expect(ariaLabel).toContain('검증 재확인 권장');
     });
 
     // BadgeSkeleton (aria-hidden span with class skeleton) is NOT present once badge shows

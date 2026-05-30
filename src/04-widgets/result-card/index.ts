@@ -1,4 +1,5 @@
 export { ResultCard } from './ui/result-card.widget';
+export { freshnessSnapshotFromIso } from './lib/freshness';
 export type {
   ResultCardSnapshot,
   FactCheckSnapshot,
@@ -7,4 +8,5 @@ export type {
   TruthLabel,
   ClaimScoreStatus,
   ClaimAttributionSnapshot,
+  FreshnessSnapshot,
 } from './model/types';
