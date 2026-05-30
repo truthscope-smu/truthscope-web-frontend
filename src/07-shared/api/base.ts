@@ -8,6 +8,11 @@ interface RequestOptions<B = unknown> extends Omit<
   'body' | 'method'
 > {
   body?: B;
+  /**
+   * 기본값은 config.api.baseUrl(Spring Boot BE). same-origin 호출 시 ''를 전달해
+   * 상대 경로(예: /api/proxy/analysis-sessions)로 요청한다. (#45 Edge 키리스 프록시)
+   */
+  baseUrl?: string;
 }
 
 interface BackendErrorBody {
@@ -21,8 +26,8 @@ async function request<T, B = unknown>(
   path: string,
   options: RequestOptions<B> = {}
 ): Promise<T> {
-  const { body, headers, ...rest } = options;
-  const url = `${config.api.baseUrl}${path}`;
+  const { body, headers, baseUrl, ...rest } = options;
+  const url = `${baseUrl ?? config.api.baseUrl}${path}`;
   const hasBody = body !== undefined;
 
   const requestHeaders = new Headers(headers);
