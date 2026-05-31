@@ -9,4 +9,5 @@ export type {
   ClaimScoreStatus,
   ClaimAttributionSnapshot,
   FreshnessSnapshot,
+  ClaimCardSnapshot,
 } from './model/types';

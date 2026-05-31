@@ -7,6 +7,7 @@ import type {
   FactCheckSnapshot,
   TruthLabel,
 } from '@04-widgets/result-card/model/types';
+import { EvidenceCard } from '@04-widgets/result-card/ui/evidence-card';
 
 interface VerdictDisplay {
   label: string;
@@ -128,20 +129,20 @@ export function FactCheckSection({ snapshot, className }: Props) {
           )}
         </div>
         {snapshot?.evidence?.length ? (
-          <ul className="flex flex-col gap-[var(--spacing-6)] list-disc pl-[var(--spacing-20)]">
-            {snapshot.evidence.map((item, idx) => (
-              <li
-                key={idx}
-                className="text-[var(--color-text-primary)] text-sm leading-relaxed"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
+          <EvidenceCard evidence={snapshot.evidence} />
         ) : (
           <SkeletonLines lines={3} />
         )}
       </div>
+
+      {snapshot?.disclaimer && (
+        <div
+          role="note"
+          className="border-l-2 border-[var(--color-info)] bg-[var(--color-blue-50)] px-[var(--spacing-10)] py-[var(--spacing-8)] text-xs text-[var(--color-text-secondary)] leading-relaxed"
+        >
+          {snapshot.disclaimer}
+        </div>
+      )}
     </section>
   );
 }

@@ -43,7 +43,22 @@ export const NormalScore: Story = {
         truthLabel: 'FACT',
         confidence: 90,
         claim: '주장 예시',
-        evidence: ['근거 1', '근거 2'],
+        evidence: [
+          {
+            url: 'https://kostat.go.kr/a',
+            publisher: '통계청',
+            title: '소비자물가 동향',
+            stance: 'supports',
+            summary: '물가상승률이 2퍼센트대를 유지하고 있음을 확인',
+          },
+          {
+            url: 'https://kostat.go.kr/b',
+            publisher: '한국은행',
+            title: '통화정책 보고서',
+            stance: 'supports',
+            summary: '목표 물가 수준 달성 전망',
+          },
+        ],
       },
       partialFailure: {
         coverage: {
@@ -90,7 +105,22 @@ export const ZeroFloor: Story = {
         truthLabel: 'NOT_FACT',
         confidence: 95,
         claim: '오류 주장',
-        evidence: ['반박 근거 1', '반박 근거 2'],
+        evidence: [
+          {
+            url: 'https://example.com/a',
+            publisher: '팩트체크',
+            title: '오류 사실 확인',
+            stance: 'refutes',
+            summary: '주장이 사실과 다름을 확인',
+          },
+          {
+            url: 'https://example.com/b',
+            publisher: '언론진흥재단',
+            title: '검증 결과',
+            stance: 'refutes',
+            summary: '다수 출처에서 반박 근거 확인',
+          },
+        ],
       },
       partialFailure: {
         coverage: {
@@ -151,7 +181,15 @@ export const PartialFailure: Story = {
         truthLabel: 'PARTLY_FACT',
         confidence: 70,
         claim: '일부 사실 주장',
-        evidence: ['근거 1'],
+        evidence: [
+          {
+            url: 'https://example.com/c',
+            publisher: '정책브리핑',
+            title: '관련 정책 자료',
+            stance: 'neutral',
+            summary: '일부 내용은 사실이나 전체적으로 과장된 측면 있음',
+          },
+        ],
       },
       partialFailure: {
         coverage: {
@@ -191,7 +229,15 @@ export const SingleSource: Story = {
         truthLabel: 'MOSTLY_FACT',
         confidence: 80,
         claim: '주장 예시',
-        evidence: ['근거 1'],
+        evidence: [
+          {
+            url: 'https://example.com/d',
+            publisher: '통계청',
+            title: '단일 출처 검증 자료',
+            stance: 'supports',
+            summary: '주요 통계 수치가 사실임을 확인',
+          },
+        ],
       },
       partialFailure: {
         coverage: {
