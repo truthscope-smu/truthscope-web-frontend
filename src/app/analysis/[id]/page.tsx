@@ -1,49 +1,49 @@
-'use client';
-
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { useArticle } from '@/app/providers/article.context';
-import {
-  ResultCard,
-  type ResultCardSnapshot,
-  freshnessSnapshotFromIso,
-} from '@/04-widgets/result-card';
-import { AttachToSessionButton } from '@/05-features/attach-to-session';
+import { findArticleVerification } from '@/06-entities/article'; // A1: 루트 배럴
+import { ResultCard, buildResultCardSnapshot } from '@/04-widgets/result-card';
+import { PollIsland } from './poll-island';
 
-export default function AnalysisDetailPage() {
-  const { snapshot } = useArticle();
+interface Props {
+  params: Promise<{ id: string }>; // Next 15 params는 Promise
+}
 
-  const attachActions = snapshot?.sessionId ? (
-    <AttachToSessionButton
-      articleId={snapshot.id}
-      sessionId={snapshot.sessionId}
-    />
-  ) : (
-    <Link
-      className="inline-flex h-9 items-center rounded-full border border-[var(--color-border-subtle)] px-[var(--spacing-16)] text-sm text-[var(--color-brand-secondary)] hover:bg-[var(--color-brand-subtle)] hover:text-[var(--color-brand-primary)]"
-      href="/analysis/new"
-    >
-      새 분석 시작
-    </Link>
-  );
+export default async function AnalysisDetailPage({ params }: Props) {
+  const { id } = await params;
 
-  // Sprint 4 BE 매핑 전 임시 snapshot. truthLabel/status 둘 다 undefined로 두면
-  // SkeletonPill이 자동 표시되어 "분석 대기 중" 상태가 시각으로 전달된다.
-  // BE Spring Boot AnalysisSession.completeCascade 응답이 들어오면 truthLabel(5종)
-  // 또는 status(3종)와 confidence/evidence가 채워지는 매핑으로 교체된다.
-  const cardSnapshot: ResultCardSnapshot | undefined = snapshot
-    ? {
-        // 임시 프록시 — article 추출 시각(createdAt)을 검증 시각 근사로 사용.
-        // BE verification_results.verified_at(#76) 랜딩 시 교체.
-        freshness: freshnessSnapshotFromIso(snapshot.createdAt),
-        factCheck: {
-          claim: snapshot.title,
-        },
-        context: {
-          summary: `분석 대상 기사: ${snapshot.url}`,
-          sourceCount: 0,
-        },
-      }
-    : undefined;
+  // 네트워크 실패는 throw → error.tsx 처리
+  const dto = await findArticleVerification(id);
+
+  // 404: 미존재/미검증 → not-found.tsx
+  if (!dto) notFound();
+
+  const isPending =
+    dto.status === 'PENDING' ||
+    dto.status === 'EXTRACTING' ||
+    dto.status === 'ANALYZING';
+
+  // A2: FAILED 분기 — 빈 ResultCard silent 렌더 방지
+  if (dto.status === 'FAILED') {
+    return (
+      <main className="mx-auto max-w-4xl px-[var(--spacing-24)] py-[var(--spacing-32)]">
+        <h1 className="text-2xl font-semibold text-[var(--color-text-heading)]">
+          분석 결과
+        </h1>
+        <p
+          className="mt-[var(--spacing-16)] text-[var(--color-error)]"
+          role="alert"
+        >
+          분석에 실패했습니다. URL을 다시 확인해주세요.
+        </p>
+        <Link
+          className="mt-[var(--spacing-16)] inline-flex h-9 items-center rounded-full border border-[var(--color-border-subtle)] px-[var(--spacing-16)] text-sm text-[var(--color-brand-secondary)] hover:bg-[var(--color-brand-subtle)] hover:text-[var(--color-brand-primary)]"
+          href="/analysis/new"
+        >
+          새 분석 시작
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-4xl px-[var(--spacing-24)] py-[var(--spacing-32)]">
@@ -52,15 +52,18 @@ export default function AnalysisDetailPage() {
           <h1 className="text-2xl font-semibold text-[var(--color-text-heading)]">
             분석 결과
           </h1>
-          {snapshot?.title && (
+          {dto.title && (
             <p className="mt-[var(--spacing-8)] text-sm text-[var(--color-text-secondary)]">
-              {snapshot.title}
+              {dto.title}
             </p>
           )}
         </div>
-        {attachActions}
       </header>
-      <ResultCard snapshot={cardSnapshot} />
+      {isPending ? (
+        <PollIsland articleId={id} />
+      ) : (
+        <ResultCard snapshot={buildResultCardSnapshot(dto)} />
+      )}
     </main>
   );
 }
