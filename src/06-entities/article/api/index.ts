@@ -23,3 +23,5 @@ export type {
   TruthLabelValue,
   ClaimScoreStatusValue,
 } from './verification-dto';
+// Phase 67 T6: 서버 컴포넌트 전용 조회 함수
+export { findArticleVerification } from './verification';
