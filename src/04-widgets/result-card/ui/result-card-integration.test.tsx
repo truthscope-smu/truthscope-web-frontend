@@ -80,8 +80,8 @@ describe('ResultCard — claims 모드', () => {
   });
 
   it('claims 모드에서 Tier2 disclaimer를 렌더한다', () => {
-    const disclaimer =
-      'AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.';
+    // 하단 일반 disclaimer와 구분되는 고유 BE 원문으로 per-claim 렌더를 특정.
+    const disclaimer = 'BE per-claim Tier2 원문 검증 문구입니다.';
     render(
       <ResultCard
         snapshot={{

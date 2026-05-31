@@ -1,7 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
 import { EvidenceCard } from './evidence-card';
 import type { EvidenceDto } from '@06-entities/article';
+
+afterEach(cleanup);
 
 const makeEvidence = (overrides: Partial<EvidenceDto> = {}): EvidenceDto => ({
   url: 'https://example.com/article',

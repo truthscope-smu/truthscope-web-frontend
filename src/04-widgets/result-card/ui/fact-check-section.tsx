@@ -2,12 +2,12 @@
 
 import { useId } from 'react';
 import { cn } from '@/07-shared/lib/cn';
+import { EvidenceCard } from '@04-widgets/result-card/ui/evidence-card';
 import type {
   ClaimScoreStatus,
   FactCheckSnapshot,
   TruthLabel,
 } from '@04-widgets/result-card/model/types';
-import { EvidenceCard } from '@04-widgets/result-card/ui/evidence-card';
 
 interface VerdictDisplay {
   label: string;
