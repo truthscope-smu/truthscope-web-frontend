@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { ResultCard } from '@/04-widgets/result-card';
+import type { EvidenceDto } from '@06-entities/article';
 
 afterEach(cleanup);
 
@@ -20,6 +21,86 @@ describe('ResultCard — claim attribution integration', () => {
     );
     expect(screen.getByRole('heading', { name: '인용 표기' })).toBeDefined();
     expect(screen.getByRole('note').textContent).toContain('화자의 입장이며');
+  });
+});
+
+// Phase 67 T4: claims 모드 통합 테스트.
+// hasClaims=true 시 ClaimCard 렌더 + context 미렌더 + Tier2 disclaimer 확인.
+const makeEvidence = (overrides: Partial<EvidenceDto> = {}): EvidenceDto => ({
+  url: 'https://example.com/article',
+  publisher: '통계청',
+  title: '소비자물가 동향 보고서',
+  stance: 'supports',
+  summary: '물가상승률이 안정적임을 확인',
+  ...overrides,
+});
+
+describe('ResultCard — claims 모드', () => {
+  it('claims 모드에서 ClaimCard를 렌더한다', () => {
+    render(
+      <ResultCard
+        snapshot={{
+          claims: [
+            {
+              claimId: 'claim-1',
+              factCheck: {
+                claim: '물가가 안정된다는 주장',
+                truthLabel: 'FACT',
+                confidence: 85,
+                evidence: [makeEvidence()],
+              },
+            },
+          ],
+        }}
+      />
+    );
+    expect(screen.getByText('물가가 안정된다는 주장')).toBeDefined();
+    expect(screen.getByLabelText('주장 1')).toBeDefined();
+  });
+
+  it('claims 모드에서 ContextSection을 렌더하지 않는다', () => {
+    render(
+      <ResultCard
+        snapshot={{
+          claims: [
+            {
+              claimId: 'claim-1',
+              factCheck: {
+                claim: '테스트 주장',
+                truthLabel: 'FACT',
+                evidence: [makeEvidence()],
+              },
+            },
+          ],
+          context: { summary: '이 요약은 claims 모드에서 미렌더됨' },
+        }}
+      />
+    );
+    expect(screen.queryByText('이 요약은 claims 모드에서 미렌더됨')).toBeNull();
+  });
+
+  it('claims 모드에서 Tier2 disclaimer를 렌더한다', () => {
+    const disclaimer =
+      'AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.';
+    render(
+      <ResultCard
+        snapshot={{
+          claims: [
+            {
+              claimId: 'claim-1',
+              factCheck: {
+                claim: 'Tier2 disclaimer 테스트 주장',
+                truthLabel: 'PARTLY_FACT',
+                evidence: [makeEvidence()],
+                disclaimer,
+              },
+              disclaimer,
+            },
+          ],
+        }}
+      />
+    );
+    expect(screen.getByText(disclaimer)).toBeDefined();
   });
 });
 

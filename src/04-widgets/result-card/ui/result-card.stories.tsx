@@ -263,3 +263,91 @@ export const SingleSource: Story = {
 export const Skeleton: Story = {
   args: { snapshot: undefined },
 };
+
+// Phase 67 T4: WithClaims — claims 모드. hasClaims=true 시 ClaimCard 목록 렌더.
+// context는 claims 모드에서 미렌더. Tier2 disclaimer + EvidenceDto 포함.
+export const WithClaims: Story = {
+  args: {
+    snapshot: {
+      articleFactScore: { value: 74, scorableCount: 4, totalClaimCount: 7 },
+      siftMapping: {
+        sourceTransparency: {
+          band: 'SOME_UNCLEAR',
+          explicitCount: 3,
+          ambiguousCount: 1,
+          noneCount: 0,
+        },
+        crossSource: { tier1Count: 2, tier2Count: 2 },
+      },
+      partialFailure: {
+        coverage: {
+          insufficientCount: 1,
+          timeSensitiveCount: 1,
+          outOfScopeCount: 1,
+          tier1Count: 2,
+          tier2Count: 2,
+          tier3Count: 3,
+        },
+        sourceTransparency: {
+          band: 'SOME_UNCLEAR',
+          explicitCount: 3,
+          ambiguousCount: 1,
+          noneCount: 0,
+        },
+      },
+      claims: [
+        {
+          claimId: 'claim-1',
+          factCheck: {
+            claim: '소비자물가 상승률이 2퍼센트대로 안정될 것이다.',
+            truthLabel: 'FACT',
+            confidence: 88,
+            evidence: [
+              {
+                url: 'https://kostat.go.kr/report/a',
+                publisher: '통계청',
+                title: '소비자물가 동향 보고서',
+                stance: 'supports',
+                summary: '최근 물가 지표가 목표 범위 내에서 안정적임을 확인.',
+              },
+              {
+                url: 'https://bok.or.kr/report/b',
+                publisher: '한국은행',
+                title: '통화정책 보고서',
+                stance: 'supports',
+                summary: '물가 목표 달성 전망을 유지함.',
+              },
+            ],
+          },
+          attribution: {
+            isQuotedClaim: true,
+            speakerName: '기획재정부 장관',
+            claimText: '소비자물가 상승률이 2퍼센트대로 안정될 것이다.',
+            originalContext: '브리핑에서 "내년 물가는 안정된다"고 발언.',
+          },
+        },
+        {
+          claimId: 'claim-2',
+          factCheck: {
+            claim: 'AI가 도출한 분석이므로 기관 검증과 다를 수 있습니다.',
+            truthLabel: 'PARTLY_FACT',
+            confidence: 61,
+            evidence: [
+              {
+                url: 'https://example.com/e',
+                publisher: '정책브리핑',
+                title: 'AI 팩트체크 가이드',
+                stance: 'neutral',
+                summary: 'AI 분석의 한계와 활용 방법을 안내.',
+              },
+            ],
+            disclaimer:
+              'AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.',
+          },
+          disclaimer:
+            'AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.',
+        },
+      ],
+    },
+  },
+};
