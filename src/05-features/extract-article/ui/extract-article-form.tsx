@@ -9,13 +9,12 @@ import {
 } from '@/06-entities/article';
 import { ExtractArticleRequestSchema } from '@05-features/extract-article/model/schema';
 import { AppError } from '@/07-shared/errors';
-import { useArticle } from '@/app/providers/article.context';
+// A7: useArticle import 제거 — page가 BE 직조회(Server Component)하므로 ArticleContext snapshot 미소비(dead code).
 
 export function ExtractArticleForm() {
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const { setSnapshot } = useArticle();
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -43,7 +42,6 @@ export function ExtractArticleForm() {
 
     try {
       const article = await requestArticleExtraction(parsed.data.url);
-      setSnapshot(article.toSnapshot());
       router.push(`/analysis/${article.id}`);
     } catch (e) {
       if (e instanceof InvariantViolationError) {
