@@ -15,5 +15,15 @@ export {
   type ArticleExtractionRequest,
   type ArticleBackendDto,
   type AnalysisSessionStatus,
+  type ArticleVerificationResponse,
+  type ClaimVerificationItemDto,
+  type EvidenceDto,
+  type SourceTransparencySummaryDto,
+  type CoverageSummaryDto,
+  type VerificationVerdict,
+  type EvidenceStance,
+  type SourceTransparencyBand,
+  type TruthLabelValue,
+  type ClaimScoreStatusValue,
 } from './api';
 // Phase 22+ deferred: SupabaseArticleRow, fromSupabaseRow, saveArticleReaction, findArticleByIdFromSupabase
