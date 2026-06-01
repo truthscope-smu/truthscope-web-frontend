@@ -107,4 +107,87 @@ describe('POST /api/proxy/analysis-sessions (#45 키리스 Edge 프록시)', () 
     expect(res.status).toBe(504);
     expect((await res.json()).statusCode).toBe(504);
   });
+
+  it('T4-8: BE 5xx 후 성공 시 자동 재시도하여 성공을 반환한다 (일시 추출 실패 완화)', async () => {
+    fetchMock.mockReset();
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            message: '기사를 가져올 수 없습니다',
+            statusCode: 500,
+          }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            sessionId: 's-2',
+            status: 'EXTRACTING',
+            articleId: 'a-2',
+          }),
+          { status: 201, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+    const res = await POST(makeRequest({ url: 'https://news.example.com/a' }));
+
+    expect(res.status).toBe(201);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('T4-9: BE 5xx가 계속되면 최대 3회 시도 후 마지막 5xx를 패스스루한다', async () => {
+    fetchMock.mockReset();
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          message: '기사를 가져올 수 없습니다',
+          statusCode: 500,
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+
+    const res = await POST(makeRequest({ url: 'https://news.example.com/a' }));
+
+    expect(res.status).toBe(500);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('T4-10: 4xx는 재시도하지 않고 즉시 패스스루한다', async () => {
+    fetchMock.mockReset();
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({ message: 'BE 검증 실패', statusCode: 400 }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+
+    const res = await POST(makeRequest({ url: 'https://news.example.com/a' }));
+
+    expect(res.status).toBe(400);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('T4-11: 일시 네트워크 오류 후 성공 시 자동 재시도한다 (타임아웃 아님)', async () => {
+    fetchMock.mockReset();
+    fetchMock
+      .mockRejectedValueOnce(new Error('connection reset'))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            sessionId: 's-3',
+            status: 'EXTRACTING',
+            articleId: 'a-3',
+          }),
+          { status: 201, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+    const res = await POST(makeRequest({ url: 'https://news.example.com/a' }));
+
+    expect(res.status).toBe(201);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });
