@@ -45,6 +45,8 @@ export default defineConfig({
         'src/07-shared/types/**',
         // Sprint 2 placeholders (services not yet implemented)
         'src/06-entities/article/api/backend.ts',
+        // 서버 fetch 함수 — Next.js 서버 컴포넌트 전용, 단위 테스트 불가 (backend.ts 동일 정책)
+        'src/06-entities/article/api/verification.ts',
         'src/05-features/extract-article/model/schema.ts',
       ],
       thresholds: {
@@ -69,6 +71,9 @@ export default defineConfig({
             'src/05-features/**/api*.test.ts',
             'src/04-widgets/**/lib/**/*.test.ts',
             'src/app/api/**/__tests__/**/*.test.ts',
+            'src/app/auth/**/__tests__/**/*.test.ts',
+            'src/07-shared/lib/**/*.test.ts',
+            'src/proxy.test.ts',
             'test/architecture.test.ts',
           ],
         },

@@ -39,7 +39,9 @@ export function SiftMapping({ snapshot, className }: Props) {
     : '출처 정보 없음';
 
   const findText = snapshot.crossSource
-    ? `Tier 1 ${snapshot.crossSource.tier1Count}건 · Tier 2 ${snapshot.crossSource.tier2Count}건 · 출처 ${snapshot.crossSource.adapterDiversity}종`
+    ? snapshot.crossSource.adapterDiversity != null
+      ? `Tier 1 ${snapshot.crossSource.tier1Count}건 · Tier 2 ${snapshot.crossSource.tier2Count}건 · 출처 ${snapshot.crossSource.adapterDiversity}종`
+      : `Tier 1 ${snapshot.crossSource.tier1Count}건 · Tier 2 ${snapshot.crossSource.tier2Count}건`
     : 'cross-source 정보 없음';
 
   return (

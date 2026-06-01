@@ -29,7 +29,8 @@ export interface SiftMappingSnapshot {
   crossSource?: {
     tier1Count: number;
     tier2Count: number;
-    adapterDiversity: number;
+    /** A5: BE 미제공 시 생략 가능. fabricate 금지. 없으면 Tier 1/2 카운트만 표시. */
+    adapterDiversity?: number;
   };
   /** T: Trace claims to origin — attribution 링크 list (ADR-020 결정 1). */
   attributionLinks?: Array<{

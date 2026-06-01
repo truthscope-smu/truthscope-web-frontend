@@ -1,6 +1,7 @@
 /**
  * ResultCard 도메인 타입. Phase 55 D12 + ADR-014 정합 (5/22 LOCK).
  * Phase 60 #46 통합: ResultCardSnapshot 3 nested optional 추가 (articleFactScore + siftMapping + partialFailure).
+ * Phase 67 #67: evidence string[] → EvidenceDto[] (breaking, T2 원자 커밋). ClaimCardSnapshot 신규.
  *
  * - TruthLabel 5종: claim score 산출 가능 시 도출 (Phase 55 deriveTruthLabel).
  * - ClaimScoreStatus 3종: claim score 산출 불가 시 별도 상태 (verdict 5종 중 비판정).
@@ -12,6 +13,7 @@
 import type { ArticleFactScoreSnapshot } from '@04-widgets/article-fact-score';
 import type { SiftMappingSnapshot } from '@04-widgets/sift-mapping';
 import type { PartialFailureSnapshot } from '@04-widgets/partial-failure-display';
+import type { EvidenceDto } from '@06-entities/article'; // A1: 루트 배럴 경유(dep-cruiser R4). /api/* 직접 금지
 
 /**
  * 진실성 5종 (claim score 0..100 밴딩에서 도출).
@@ -48,7 +50,10 @@ export interface FactCheckSnapshot {
   /** 0-100. TruthLabel일 때만 의미. status일 때 NULL ("모르면 모른다" 원칙). */
   confidence?: number;
   claim?: string;
-  evidence?: string[];
+  /** Phase 67: string[] → EvidenceDto[] (breaking). BE EvidenceDto 1:1 매핑. */
+  evidence?: EvidenceDto[];
+  /** Phase 67: Tier2 per-claim BE 원문 disclaimer. */
+  disclaimer?: string;
 }
 
 export interface ContextSnapshot {
@@ -71,6 +76,18 @@ export interface ClaimAttributionSnapshot {
   speakerName?: string;
   /** 인용 원문 맥락. details 펼치기로 노출 (선택). */
   originalContext?: string;
+}
+
+/**
+ * Phase 67: claim 단위 카드 스냅샷. BE ClaimVerificationItemDto → build-snapshot 변환.
+ * claims 모드(hasClaims=true) 시 result-card.widget.tsx가 ClaimCard[]로 렌더.
+ */
+export interface ClaimCardSnapshot {
+  claimId: string;
+  factCheck: FactCheckSnapshot;
+  attribution?: ClaimAttributionSnapshot;
+  /** Tier2 원문(factCheck.disclaimer와 동일값). ClaimCard 레벨에서도 접근 가능하도록 중복 저장. */
+  disclaimer?: string;
 }
 
 /**
@@ -99,15 +116,20 @@ export interface ResultCardSnapshot {
    * scorableCount/excludedCount는 derive 가능하므로 widget 노출 제외.
    */
   partialFailure?: PartialFailureSnapshot;
-  /** claim 인용 표기 sub-component (#49 phase 63) — attribution + disclaimer. */
+  /**
+   * Phase 67: claim 단위 스냅샷 목록. 채워지면 claims 모드.
+   * BE ClaimVerificationItemDto[] → buildResultCardSnapshot 변환 (T5).
+   */
+  claims?: ClaimCardSnapshot[];
+  /** claim 인용 표기 sub-component (#49 phase 63) — 레거시(하위호환, claims 모드 비활성 시 사용). */
   claimAttribution?: ClaimAttributionSnapshot;
   /**
    * 검증 노후도(#48). 임시 프록시 article.createdAt 사용,
    * BE verification_results.verified_at(#76) 랜딩 시 교체.
    */
   freshness?: FreshnessSnapshot;
-  /** 기존 — claim별 진실성 라벨. */
+  /** 레거시 — claim별 진실성 라벨 (claims 모드 비활성 시). */
   factCheck?: FactCheckSnapshot;
-  /** 기존 — 맥락 (요약 + 관련 기사 + sourceCount). */
+  /** 레거시 — 맥락 (요약 + 관련 기사 + sourceCount). BE 기사 summary 없음 → claims 모드에서 미렌더(A8 유지). */
   context?: ContextSnapshot;
 }

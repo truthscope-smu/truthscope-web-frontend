@@ -8,6 +8,7 @@ import { PartialFailureDisplay } from '@04-widgets/partial-failure-display';
 import type { PartialFailureSnapshot } from '@04-widgets/partial-failure-display';
 import type { ResultCardSnapshot } from '@04-widgets/result-card/model/types';
 import { ClaimAttributionSection } from '@04-widgets/result-card/ui/claim-attribution-section';
+import { ClaimCard } from '@04-widgets/result-card/ui/claim-card';
 import { ContextSection } from '@04-widgets/result-card/ui/context-section';
 import { FactCheckSection } from '@04-widgets/result-card/ui/fact-check-section';
 
@@ -18,15 +19,19 @@ interface Props {
 }
 
 export function ResultCard({ snapshot, className }: Props) {
-  // Q4 uniqueSourceCount fallback mapping (DISCUSS Q4 정합 — ContextSnapshot.sourceCount 재사용).
-  // useMemo 제거 (Round 1 CX-3 amend — 계산 싸고 deps shallow equality 함정 회피).
+  // Phase 67 T4: claims 모드 분기.
+  // hasClaims=true 시 ClaimCard 목록 렌더. context는 레거시 모드(!hasClaims)에서만.
+  // A4: uniqueSourceCount는 BE 기사 단위 필드 없음 — sourceTransparency + EvidenceCard 단일출처 배지로 대체.
+  // 레거시 모드에서만 context.sourceCount fallback 유지 (하위호환).
+  const hasClaims = !!snapshot?.claims?.length;
+
   const mergedPartialFailure: PartialFailureSnapshot | undefined =
     snapshot?.partialFailure
       ? {
           ...snapshot.partialFailure,
           uniqueSourceCount:
             snapshot.partialFailure.uniqueSourceCount ??
-            snapshot.context?.sourceCount,
+            (!hasClaims ? snapshot.context?.sourceCount : undefined),
         }
       : undefined;
 
@@ -47,10 +52,18 @@ export function ResultCard({ snapshot, className }: Props) {
       )}
       <ArticleFactScore snapshot={snapshot?.articleFactScore} />
       <SiftMapping snapshot={snapshot?.siftMapping} />
-      <ClaimAttributionSection snapshot={snapshot?.claimAttribution} />
-      <FactCheckSection snapshot={snapshot?.factCheck} />
       <PartialFailureDisplay snapshot={mergedPartialFailure} />
-      <ContextSection snapshot={snapshot?.context} />
+      {hasClaims ? (
+        snapshot!.claims!.map((c, i) => (
+          <ClaimCard key={c.claimId} claim={c} index={i + 1} />
+        ))
+      ) : (
+        <>
+          <ClaimAttributionSection snapshot={snapshot?.claimAttribution} />
+          <FactCheckSection snapshot={snapshot?.factCheck} />
+        </>
+      )}
+      {!hasClaims && <ContextSection snapshot={snapshot?.context} />}
       <p className="px-[var(--spacing-24)] pb-[var(--spacing-16)] text-xs text-[var(--color-text-secondary)]">
         AI 분석이며 기관 검증이 아닙니다. 참고 용도로만 활용하세요.
       </p>
