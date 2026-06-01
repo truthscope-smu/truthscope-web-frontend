@@ -14,6 +14,7 @@ export async function GET(request: Request): Promise<Response> {
   if (searchParams.get('error')) {
     const loginUrl = new URL('/login', origin);
     loginUrl.searchParams.set('error', 'oauth_cancelled');
+    loginUrl.searchParams.set('next', next);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -29,6 +30,7 @@ export async function GET(request: Request): Promise<Response> {
   if (error) {
     const loginUrl = new URL('/login', origin);
     loginUrl.searchParams.set('error', 'auth_failed');
+    loginUrl.searchParams.set('next', next);
     return NextResponse.redirect(loginUrl);
   }
 

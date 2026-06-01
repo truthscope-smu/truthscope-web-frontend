@@ -27,11 +27,18 @@ export function useAuth(): AuthState & { signOut: () => Promise<void> } {
     const supabase = getSupabaseBrowserClient();
     let active = true;
 
-    supabase.auth.getUser().then((result: UserResponse) => {
-      if (!active) return;
-      setUser(result.data.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth
+      .getUser()
+      .then((result: UserResponse) => {
+        if (!active) return;
+        setUser(result.data.user ?? null);
+        setLoading(false);
+      })
+      .catch(() => {
+        // getUser 실패 시에도 loading 해제함 (UI 무한 로딩 방지)
+        if (!active) return;
+        setLoading(false);
+      });
 
     const {
       data: { subscription },
@@ -50,8 +57,11 @@ export function useAuth(): AuthState & { signOut: () => Promise<void> } {
 
   const signOut = useCallback(async () => {
     const supabase = getSupabaseBrowserClient();
-    await supabase.auth.signOut();
-    setUser(null);
+    const { error } = await supabase.auth.signOut();
+    // 실패 시 user를 비우지 않음(세션 잔존 가능). 성공 시 즉시 반영 + onAuthStateChange SIGNED_OUT 보강
+    if (!error) {
+      setUser(null);
+    }
   }, []);
 
   return { user, loading, signOut };

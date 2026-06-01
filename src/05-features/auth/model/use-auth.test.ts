@@ -127,6 +127,35 @@ describe('useAuth', () => {
     expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
 
+  it('getUser 실패 시에도 loading 해제됨 (무한 로딩 방지)', async () => {
+    mockGetUser.mockRejectedValue(new Error('network'));
+
+    const { result } = renderHook(() => useAuth());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.user).toBeNull();
+  });
+
+  it('signOut 실패 시 user를 비우지 않음 (세션 잔존 가능)', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: testUser }, error: null });
+    mockSignOut.mockResolvedValue({ error: { message: 'signout failed' } });
+
+    const { result } = renderHook(() => useAuth());
+
+    await waitFor(() => {
+      expect(result.current.user).toEqual(testUser);
+    });
+
+    await act(async () => {
+      await result.current.signOut();
+    });
+
+    expect(result.current.user).toEqual(testUser);
+  });
+
   it('unmount 시 subscription.unsubscribe 호출됨', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
 

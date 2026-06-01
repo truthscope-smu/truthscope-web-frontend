@@ -23,9 +23,17 @@ export function SocialLoginButtons({
   async function handleSocialLogin(provider: SocialProvider) {
     setLoadingProvider(provider);
     setError(null);
-    const err = await signInWithSocialProvider(provider, nextPath);
-    if (err) {
-      setError(err);
+    try {
+      const err = await signInWithSocialProvider(provider, nextPath);
+      if (err) {
+        // signInWithOAuth가 에러 문자열 반환 — 버튼 복구 + 메시지 표시함
+        setError(err);
+        setLoadingProvider(null);
+      }
+      // 정상 시 provider redirect 발생 — loading 유지(페이지 이탈)
+    } catch {
+      // 예외(네트워크 등) 시에도 버튼 잠금 해제 + 메시지 표시함
+      setError('로그인 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
       setLoadingProvider(null);
     }
   }

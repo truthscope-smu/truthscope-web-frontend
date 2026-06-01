@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 
 /**
  * social-auth.ts — signInWithSocialProvider 단위 테스트
@@ -17,13 +17,23 @@ vi.mock('@/07-shared/api/supabase/client', () => ({
 
 import { signInWithSocialProvider } from './social-auth';
 
-// window.location.origin 설정
+// window.location.origin 설정 (원본 저장 후 afterAll에서 복구함 — 전역 누수 방지)
+const originalLocation = window.location;
 Object.defineProperty(window, 'location', {
   value: { origin: 'https://example.com' },
   writable: true,
+  configurable: true,
 });
 
 describe('signInWithSocialProvider', () => {
+  afterAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true,
+    });
+  });
+
   beforeEach(() => {
     mockSignInWithOAuth.mockReset();
     mockSignInWithOAuth.mockResolvedValue({

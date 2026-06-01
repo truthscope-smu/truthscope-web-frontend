@@ -66,6 +66,19 @@ describe('GET /auth/callback', () => {
     expect(location).toContain('error=auth_failed');
   });
 
+  it('exchange 실패 시 next도 유지됨 (재시도 의도 보존)', async () => {
+    mockExchangeCodeForSessionFn.mockResolvedValue({
+      error: { message: 'invalid code' },
+    });
+
+    const request = makeRequest({ code: 'bad-code', next: '/history' });
+    const response = await GET(request);
+
+    const location = response.headers.get('location')!;
+    expect(location).toContain('error=auth_failed');
+    expect(location).toContain('next=%2Fhistory');
+  });
+
   it('성공 시 next 경로로 redirect됨', async () => {
     mockExchangeCodeForSessionFn.mockResolvedValue({ error: null });
 
