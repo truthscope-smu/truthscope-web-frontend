@@ -34,18 +34,26 @@ export async function POST(request: Request): Promise<Response> {
 
   const payload = JSON.stringify(body);
 
+  // 로그인 사용자의 Supabase 액세스 토큰 — BE member 바인딩용 (ADR-027).
+  // X-User-Gemini-Key는 여전히 전달하지 않는다(키리스 정책 유지).
+  const authHeader = request.headers.get('Authorization');
+
   // 자동 재시도 루프. 재시도 대상은 일시적 실패(BE 5xx, 일시 네트워크 오류)뿐이다.
   // 4xx(요청 오류)는 결정적이라 즉시 패스스루하고, 타임아웃은 이미 15초를 기다렸으므로
   // 재시도하지 않고 504로 끊는다(누적 대기 폭증 방지).
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     let beRes: Response;
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      };
+      if (authHeader) {
+        headers.Authorization = authHeader;
+      }
       beRes = await fetch(`${config.api.baseUrl}/analysis-sessions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
+        headers,
         body: payload,
         signal: AbortSignal.timeout(15000),
       });
