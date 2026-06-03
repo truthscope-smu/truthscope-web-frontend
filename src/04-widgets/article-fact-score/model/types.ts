@@ -12,6 +12,6 @@ export interface ArticleFactScoreSnapshot {
   value?: number;
   /** 검증 가능 claim 수 (CoverageSummary.scorableCount). */
   scorableCount?: number;
-  /** 전체 claim 수 (scorableCount + excludedCount). coverage "N개 중 M개 기준" 텍스트 생성용. */
+  /** 전체 claim 수 (scorableCount + excludedCount). 커버리지 배지 "검증된 주장 N/M개" + 초과분 "K개는 검증 불가" 생성용. */
   totalClaimCount?: number;
 }
