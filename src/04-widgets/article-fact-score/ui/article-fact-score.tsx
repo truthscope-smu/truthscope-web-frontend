@@ -24,6 +24,9 @@ export function ArticleFactScore({ snapshot, className }: Props) {
   const hasCoverage =
     typeof snapshot.scorableCount === 'number' &&
     typeof snapshot.totalClaimCount === 'number';
+  const coverageTotal = snapshot.totalClaimCount ?? 0;
+  const coverageScorable = snapshot.scorableCount ?? 0;
+  const coverageExcluded = coverageTotal - coverageScorable;
 
   return (
     <section
@@ -45,15 +48,27 @@ export function ArticleFactScore({ snapshot, className }: Props) {
           <span className="text-xs text-[var(--color-text-secondary)]">
             {SCORE_LABEL}
           </span>
-          {hasCoverage && (
-            <span
-              aria-label={`검증 가능 주장 ${snapshot.totalClaimCount}개 중 ${snapshot.scorableCount}개 기준`}
-              className="text-xs text-[var(--color-text-secondary)] tabular-nums"
-            >
-              검증 가능 {snapshot.totalClaimCount}개 중 {snapshot.scorableCount}
-              개 기준
-            </span>
-          )}
+          {hasCoverage &&
+            (coverageExcluded > 0 ? (
+              <span
+                role="note"
+                aria-label={`검증된 주장 ${coverageTotal}개 중 ${coverageScorable}개, ${coverageExcluded}개는 검증 불가`}
+                className="inline-flex items-center gap-[var(--spacing-6)] rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface-sunken)] px-[var(--spacing-10)] py-[var(--spacing-6)] text-xs font-semibold text-[var(--color-text-primary)] tabular-nums"
+              >
+                <span
+                  aria-hidden="true"
+                  className="text-[var(--color-text-secondary)]"
+                >
+                  ⓘ
+                </span>
+                검증된 주장 {coverageScorable}/{coverageTotal}개 ·{' '}
+                {coverageExcluded}개는 검증 불가
+              </span>
+            ) : (
+              <span className="text-xs text-[var(--color-text-secondary)] tabular-nums">
+                검증된 주장 {coverageScorable}/{coverageTotal}개
+              </span>
+            ))}
         </>
       ) : (
         <>
