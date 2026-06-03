@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { ClaimCard } from './claim-card';
 import type { ClaimCardSnapshot } from '../model/types';
 import type { EvidenceDto } from '@06-entities/article';
@@ -138,6 +138,8 @@ describe('ClaimCard — evidence 단일 렌더(중복 금지)', () => {
         index={1}
       />
     );
+    // 근거 섹션은 기본 닫힘 토글이므로 먼저 펼친 뒤 검증한다
+    fireEvent.click(screen.getByRole('button', { name: '근거 보기' }));
     // publisher 텍스트가 정확히 1개만 나타나야 한다(중복 렌더 없음)
     const links = screen.getAllByRole('link');
     const evidenceLinks = links.filter((l) =>
