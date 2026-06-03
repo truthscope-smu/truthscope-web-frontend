@@ -84,6 +84,7 @@ export default defineConfig({
           name: 'browser',
           setupFiles: ['./vitest.setup.browser.ts'],
           include: [
+            'src/03-pages/**/__tests__/**/*.test.tsx',
             'src/04-widgets/**/*.test.tsx',
             'src/05-features/**/ui/**/*.test.tsx',
           ],

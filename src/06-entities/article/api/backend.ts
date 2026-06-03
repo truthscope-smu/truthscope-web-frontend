@@ -3,6 +3,7 @@
 // barrel 경유 시 client component bundle에 server-only code 폴루션 (next build 실패).
 // 기존 TruthScope 패턴 정합 — 05-features/analysis/api.ts:1 와 동일.
 import { apiClient } from '@/07-shared/api/base';
+import { getSupabaseBrowserClient } from '@/07-shared/api/supabase/client';
 import {
   fromAnalysisSession,
   fromBackendDto,
@@ -24,10 +25,21 @@ import type { Article } from '@06-entities/article/model/article';
  * 패스스루하므로 ArticleExtractionResponse 매핑은 영향받지 않는다.
  */
 export async function requestArticleExtraction(url: string): Promise<Article> {
+  // 로그인 사용자의 액세스 토큰을 첨부해 BE가 member_id를 바인딩할 수 있게 한다(Phase 70 / ADR-027).
+  // 미로그인(session null)이면 헤더를 첨부하지 않아 BE 익명 분석 흐름을 유지한다.
+  const { data } = await getSupabaseBrowserClient().auth.getSession();
+  const token = data.session?.access_token;
   const response = await apiClient.post<
     ArticleExtractionResponse,
     ArticleExtractionRequest
-  >('/api/proxy/analysis-sessions', { url }, { baseUrl: '' });
+  >(
+    '/api/proxy/analysis-sessions',
+    { url },
+    {
+      baseUrl: '',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    }
+  );
   return fromAnalysisSession(url, response);
 }
 

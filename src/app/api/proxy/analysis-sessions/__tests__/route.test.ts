@@ -190,4 +190,32 @@ describe('POST /api/proxy/analysis-sessions (#45 키리스 Edge 프록시)', () 
     expect(res.status).toBe(201);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it('T4-12: Authorization 헤더가 있으면 BE로 전달한다 (Phase 70 / ADR-027)', async () => {
+    const req = new Request('http://localhost/api/proxy/analysis-sessions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-supabase-token',
+      },
+      body: JSON.stringify({ url: 'https://news.example.com/a' }),
+    });
+
+    await POST(req);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const headers = new Headers(init.headers);
+    expect(headers.get('Authorization')).toBe('Bearer test-supabase-token');
+    // X-User-Gemini-Key는 여전히 미전달(키리스 정책 유지)
+    expect(headers.has('X-User-Gemini-Key')).toBe(false);
+  });
+
+  it('T4-13: Authorization 헤더가 없으면 BE로 전달하지 않는다 (익명 분석 유지)', async () => {
+    await POST(makeRequest({ url: 'https://news.example.com/a' }));
+
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const headers = new Headers(init.headers);
+    expect(headers.has('Authorization')).toBe(false);
+  });
 });
