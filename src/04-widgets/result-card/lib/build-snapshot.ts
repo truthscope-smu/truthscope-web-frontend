@@ -60,10 +60,16 @@ export function buildResultCardSnapshot(
 
   const cov = dto.coverage;
 
+  // MF-4 / T15: per-claim verifiedAt 우선, 없으면 analysisCompletedAt 폴백
+  // dto.claims[n].verifiedAt 중 첫 번째 truthy 값을 freshness 기준으로 사용한다.
+  const firstVerifiedAt = dto.claims.find((c) => c.verifiedAt)?.verifiedAt;
+
   return {
-    freshness: dto.analysisCompletedAt
-      ? freshnessSnapshotFromIso(dto.analysisCompletedAt)
-      : undefined,
+    freshness: firstVerifiedAt
+      ? freshnessSnapshotFromIso(firstVerifiedAt)
+      : dto.analysisCompletedAt
+        ? freshnessSnapshotFromIso(dto.analysisCompletedAt)
+        : undefined,
     articleFactScore: cov
       ? {
           value: dto.totalScore ?? undefined,

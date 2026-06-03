@@ -139,17 +139,39 @@ describe('buildResultCardSnapshot — rename chain', () => {
     expect(snap.claims?.[0]?.factCheck.truthLabel).toBeUndefined();
   });
 
-  it('analysisCompletedAt → freshness.createdAtMs로 변환된다', () => {
-    const snap = buildResultCardSnapshot(makeBaseDto());
+  // MF-4 (a): verifiedAt이 있으면 verifiedAt → freshness.createdAtMs로 변환된다
+  it('verifiedAt이 있으면 verifiedAt → freshness.createdAtMs로 변환된다', () => {
+    // claim.verifiedAt을 analysisCompletedAt과 다른 값으로 설정해 구분
+    const claimVerifiedAt = '2026-04-01T08:00:00.000Z';
+    const dto = makeBaseDto({
+      analysisCompletedAt: '2026-05-31T10:00:00.000Z', // 다른 값
+      claims: [makeClaimItem({ verifiedAt: claimVerifiedAt })],
+    });
+    const snap = buildResultCardSnapshot(dto);
     expect(snap.freshness).toBeDefined();
-    expect(snap.freshness?.createdAtMs).toBe(
-      Date.parse('2026-05-31T10:00:00.000Z')
-    );
+    // verifiedAt 기준이어야 함 (analysisCompletedAt 아님)
+    expect(snap.freshness?.createdAtMs).toBe(Date.parse(claimVerifiedAt));
   });
 
-  it('analysisCompletedAt=null이면 freshness는 undefined', () => {
+  // MF-4 (b): 모든 claim verifiedAt이 falsy이면 analysisCompletedAt 폴백
+  it('모든 claim verifiedAt이 없으면 analysisCompletedAt → freshness.createdAtMs로 폴백된다', () => {
+    const fallbackAt = '2026-05-31T10:00:00.000Z';
+    // verifiedAt을 빈 문자열로 덮어쓰면 .find(c => c.verifiedAt) 가 falsy 처리
+    const dto = makeBaseDto({
+      analysisCompletedAt: fallbackAt,
+      claims: [makeClaimItem({ verifiedAt: '' as unknown as string })],
+    });
+    const snap = buildResultCardSnapshot(dto);
+    expect(snap.freshness).toBeDefined();
+    expect(snap.freshness?.createdAtMs).toBe(Date.parse(fallbackAt));
+  });
+
+  it('analysisCompletedAt=null이고 verifiedAt도 없으면 freshness는 undefined', () => {
     const snap = buildResultCardSnapshot(
-      makeBaseDto({ analysisCompletedAt: null })
+      makeBaseDto({
+        analysisCompletedAt: null,
+        claims: [makeClaimItem({ verifiedAt: '' as unknown as string })],
+      })
     );
     expect(snap.freshness).toBeUndefined();
   });

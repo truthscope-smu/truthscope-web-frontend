@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { cn } from '@/07-shared/lib/cn';
 import { EvidenceCard } from '@04-widgets/result-card/ui/evidence-card';
 import type {
@@ -58,6 +58,8 @@ interface Props {
 
 export function FactCheckSection({ snapshot, className }: Props) {
   const titleId = useId();
+  // T16: 근거 보기 토글 (기본 닫힘, MF-4 대응)
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const display = snapshot?.truthLabel
     ? TRUTH_LABEL_DISPLAY[snapshot.truthLabel]
     : snapshot?.status
@@ -116,9 +118,14 @@ export function FactCheckSection({ snapshot, className }: Props) {
 
       <div className="flex flex-col gap-[var(--spacing-10)]">
         <div className="flex items-baseline justify-between">
-          <p className="text-xs uppercase tracking-wide text-[var(--color-text-secondary)]">
-            근거
-          </p>
+          <button
+            type="button"
+            aria-expanded={evidenceOpen}
+            onClick={() => setEvidenceOpen((prev) => !prev)}
+            className="text-xs uppercase tracking-wide text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+          >
+            {evidenceOpen ? '근거 닫기' : '근거 보기'}
+          </button>
           {showConfidence && (
             <p
               aria-label={`신뢰도 ${snapshot?.confidence}퍼센트`}
@@ -128,11 +135,11 @@ export function FactCheckSection({ snapshot, className }: Props) {
             </p>
           )}
         </div>
-        {snapshot?.evidence?.length ? (
+        {evidenceOpen && snapshot?.evidence?.length ? (
           <EvidenceCard evidence={snapshot.evidence} />
-        ) : (
+        ) : evidenceOpen ? (
           <SkeletonLines lines={3} />
-        )}
+        ) : null}
       </div>
 
       {snapshot?.disclaimer && (
